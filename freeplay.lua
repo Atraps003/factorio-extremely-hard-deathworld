@@ -164,15 +164,20 @@ local on_player_created = function(event)
 end
 
 local on_player_respawned = function(event)
-  local player = game.get_player(event.player_index)
-  if game.ticks_played > 720 then
-  util.insert_safe(player, global.respawn_items)
-  else
-  util.insert_safe(player, global.created_items)
-  end
+local player = game.get_player(event.player_index)
+  	if game.ticks_played > 720 then
+  	util.insert_safe(player, global.respawn_items)
+  	else
+  	util.insert_safe(player, global.created_items)
+	if global.tick_to_start_charting_spawn ~= nil and game.tick >= global.tick_to_start_charting_spawn then
+  	chart_starting_area()
+	global.tick_to_start_charting_spawn = nil
+  	end
+  	end
 end
 --------------------------------------------------------------------------------------------------------------------------------------------
 global.restart = "false"
+global.tick_to_start_charting_spawn = nil
 
 global.latch = 0
 global.w = "small-worm-turret"
@@ -300,6 +305,7 @@ function reset()
 	change_seed()
 	game.surfaces[1].clear(true)
 	game.forces["player"].reset()
+	global.tick_to_start_charting_spawn = game.tick + 1
 	end
 end
 -----------------------------------------------------------------------------------------------
@@ -321,7 +327,6 @@ local on_surface_cleared = function(event)
 	util.insert_safe(pl, global.created_items)
 	end
 	game.surfaces[1].create_entity{name = "explosive-cannon-projectile", target = {0,0}, speed=1, position = {0,0}, force = "enemy"}
-	chart_starting_area()
 	global.latch = 0
 	global.w = "small-worm-turret"
 	global.e = "grenade"
