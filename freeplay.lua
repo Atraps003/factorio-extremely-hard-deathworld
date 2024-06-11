@@ -1,6 +1,19 @@
 local util = require("util")
 local crash_site = require("crash-site")
 
+global.restart = "false"
+global.tick_to_start_charting_spawn = nil
+
+global.latch = 0
+global.w = "small-worm-turret"
+global.e = "grenade"
+global.n = 6
+global.f = {}
+global.t = {}
+global.pu = {}
+global.r = {}
+global.s = {}
+
 local created_items = function()
 	return
 	{
@@ -89,8 +102,76 @@ local change_seed = function()
 	mgs.seed = math.random(1111,999999999)
 	surface.map_gen_settings = mgs
 end
-
 -------------------------------------------------------------------------------------------------------------------------------
+
+local reset_global_settings = function()
+	-- clear game statistics
+	game.reset_game_state()
+	game.reset_time_played()
+	game.forces["enemy"].reset()
+	game.forces["enemy"].reset_evolution()
+	game.pollution_statistics.clear()
+
+	-- clear globals
+	global.latch = 0
+	global.w = "small-worm-turret"
+	global.e = "grenade"
+	global.n = 6
+	global.f = {}
+	global.t = {}
+	global.pu = {}
+	global.r = {}
+	global.s = {}
+--  global.player_state = {}
+
+	-- default starting map settings
+	game.map_settings.enemy_evolution.destroy_factor = 0
+	game.map_settings.enemy_evolution.pollution_factor = 0.0000009
+	game.map_settings.enemy_evolution.time_factor = 0.00002
+	game.map_settings.enemy_expansion.enabled = true
+	game.map_settings.enemy_expansion.max_expansion_cooldown  = 4000
+	game.map_settings.enemy_expansion.min_expansion_cooldown  = 3000
+	game.map_settings.enemy_expansion.settler_group_max_size  = 7
+	game.map_settings.enemy_expansion.settler_group_min_size = 5
+	game.map_settings.path_finder.general_entity_collision_penalty = 1
+	game.map_settings.path_finder.general_entity_subsequent_collision_penalty = 1
+	game.map_settings.pollution.ageing = 0.5
+	game.map_settings.pollution.enemy_attack_pollution_consumption_modifier = 0.5
+	game.map_settings.unit_group.max_gathering_unit_groups = 30
+	game.map_settings.unit_group.max_unit_group_size = 300
+
+	local surface = game.surfaces[1]
+	surface.brightness_visual_weights = { 1, 1, 1 }
+	surface.min_brightness = 0
+	surface.dawn = 0.80
+	surface.dusk = 0.20
+	surface.evening = 0.40
+	surface.morning = 0.60
+	surface.daytime = 0.70
+	surface.freeze_daytime = false
+
+	game.forces["enemy"].friendly_fire = false
+	game.forces["player"].research_queue_enabled = true
+
+--  game.map_settings.enemy_expansion.max_expansion_distance = 1
+--  game.map_settings.enemy_expansion.friendly_base_influence_radius = 0
+--	game.map_settings.enemy_expansion.enemy_building_influence_radius  = 0
+--  game.map_settings.enemy_expansion.other_base_coefficient = 0
+--	game.map_settings.enemy_expansion.building_coefficient = 0
+--  game.map_settings.enemy_expansion.max_colliding_tiles_coefficient = 0
+
+--	game.forces["player"].max_successful_attempts_per_tick_per_construction_queue = 10
+--	game.forces["player"].max_failed_attempts_per_tick_per_construction_queue = 10
+--	game.permissions.get_group('Default').set_allows_action(defines.input_action.add_permission_group, false)
+--	game.permissions.get_group('Default').set_allows_action(defines.input_action.delete_permission_group, false)
+--	game.permissions.get_group('Default').set_allows_action(defines.input_action.edit_permission_group, false)
+--	game.permissions.get_group('Default').set_allows_action(defines.input_action.import_permissions_string, false)
+--	game.permissions.get_group('Default').set_allows_action(defines.input_action.map_editor_action, false)
+--	game.permissions.get_group('Default').set_allows_action(defines.input_action.toggle_map_editor, false)
+--	game.permissions.create_group('Owner')
+--	game.permissions.get_group('Owner').add_player("Atraps003")
+
+end
 
 local on_player_created = function(event)
 	local player = game.get_player(event.player_index)
@@ -100,56 +181,14 @@ local on_player_created = function(event)
 	print(serpent.line(x))
 	
 	if not global.init_ran then
-		----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-		--This is so that other mods and scripts have a chance to do remote calls before we do things like charting the starting area, creating the crash site, etc.
-		game.map_settings.enemy_expansion.enabled = true
-		game.map_settings.unit_group.max_gathering_unit_groups = 30
-		game.map_settings.unit_group.max_unit_group_size = 300
-		--  game.map_settings.enemy_expansion.max_expansion_distance = 1
-		game.map_settings.enemy_expansion.settler_group_min_size = 5
-		game.map_settings.enemy_expansion.settler_group_max_size  = 7
-		game.map_settings.enemy_expansion.min_expansion_cooldown  = 3000
-		game.map_settings.enemy_expansion.max_expansion_cooldown  = 4000
-		--  game.map_settings.enemy_expansion.friendly_base_influence_radius = 0
-		--	game.map_settings.enemy_expansion.enemy_building_influence_radius  = 0
-		--  game.map_settings.enemy_expansion.other_base_coefficient = 0
-		--	game.map_settings.enemy_expansion.building_coefficient = 0
-		--  game.map_settings.enemy_expansion.max_colliding_tiles_coefficient = 0
-		game.map_settings.enemy_evolution.time_factor = 0.00002
-		game.map_settings.enemy_evolution.destroy_factor = 0
-		game.map_settings.enemy_evolution.pollution_factor = 0.0000009
-		game.map_settings.pollution.ageing = 0.5
-		game.map_settings.pollution.enemy_attack_pollution_consumption_modifier = 0.5
-		player.surface.brightness_visual_weights = { 1, 1, 1 }
-		player.surface.min_brightness = 0
-		player.surface.dawn = 0.80
-		player.surface.dusk = 0.20
-		player.surface.evening = 0.40
-		player.surface.morning = 0.60
-		player.surface.daytime = 0.70
-		player.surface.freeze_daytime = false
-		game.forces["enemy"].friendly_fire = false
-		game.map_settings.path_finder.general_entity_collision_penalty = 1
-		game.map_settings.path_finder.general_entity_subsequent_collision_penalty = 1
-		--	game.forces["player"].max_successful_attempts_per_tick_per_construction_queue = 10
-		--	game.forces["player"].max_failed_attempts_per_tick_per_construction_queue = 10
-		game.forces["player"].research_queue_enabled = true
-		--	game.permissions.get_group('Default').set_allows_action(defines.input_action.add_permission_group, false)
-		--	game.permissions.get_group('Default').set_allows_action(defines.input_action.delete_permission_group, false)
-		--	game.permissions.get_group('Default').set_allows_action(defines.input_action.edit_permission_group, false)
-		--	game.permissions.get_group('Default').set_allows_action(defines.input_action.import_permissions_string, false)
-		--	game.permissions.get_group('Default').set_allows_action(defines.input_action.map_editor_action, false)
-		--	game.permissions.get_group('Default').set_allows_action(defines.input_action.toggle_map_editor, false)
-		--	game.permissions.create_group('Owner')
-		--	game.permissions.get_group('Owner').add_player("Atraps003")
-		-------------------------------------------------------------------------------------------------------------------------------------
+	-- This is so that other mods and scripts have a chance to do remote calls before we do things like charting the starting area, creating the crash site, etc.
 		global.init_ran = true
 		
+		reset_global_settings()
+
 		chart_starting_area()
 		--	map_gen_1()
-		-----------------------------------------------------------------------------------------------------------------------------
-		
-		
+
 		if not global.disable_crashsite then
 			local surface = player.surface
 			crash_site.create_crash_site(surface, {-5,-6}, util.copy(global.crashed_ship_items), util.copy(global.crashed_debris_items), util.copy(global.crashed_ship_parts))
@@ -175,19 +214,6 @@ local on_player_respawned = function(event)
 		end
 	end
 end
---------------------------------------------------------------------------------------------------------------------------------------------
-global.restart = "false"
-global.tick_to_start_charting_spawn = nil
-
-global.latch = 0
-global.w = "small-worm-turret"
-global.e = "grenade"
-global.n = 6
-global.f = {}
-global.t = {}
-global.pu = {}
-global.r = {}
-global.s = {}
 -----------------------------------------ID 1--------------------------------------------------------
 function f_location()
 	local next = next
@@ -315,11 +341,6 @@ local on_surface_cleared = function(event)
 	--	surface.request_to_generate_chunks({0, 0}, 6)
 	--	surface.force_generate_chunk_requests()
 	--	crash_site.create_crash_site(surface, {-5,-6}, util.copy(global.crashed_ship_items), util.copy(global.crashed_debris_items), util.copy(global.crashed_ship_parts))
-	game.reset_game_state()
-	game.reset_time_played()
-	game.forces["enemy"].reset()
-	game.forces["enemy"].reset_evolution()
-	game.pollution_statistics.clear()
 	for _, pl in pairs(game.players) do
 		--	pl.teleport(game.surfaces[1].find_non_colliding_position("character", {0, 0}, 0, 1))
 		pl.teleport({0,0})
@@ -327,24 +348,8 @@ local on_surface_cleared = function(event)
 		util.insert_safe(pl, global.created_items)
 	end
 	game.surfaces[1].create_entity{name = "explosive-cannon-projectile", target = {0,0}, speed=1, position = {0,0}, force = "enemy"}
-	global.latch = 0
-	global.w = "small-worm-turret"
-	global.e = "grenade"
-	global.n = 6
-	global.f = {}
-	global.t = {}
-	global.pu = {}
-	global.r = {}
-	global.s = {}
-	game.map_settings.enemy_evolution.time_factor = 0.00002
-	game.map_settings.pollution.enemy_attack_pollution_consumption_modifier = 0.5
-	game.map_settings.pollution.ageing = 0.5
-	game.map_settings.enemy_expansion.settler_group_min_size = 5
-	game.map_settings.enemy_expansion.settler_group_max_size  = 7
-	surface.daytime = 0.70
-	surface.ticks_per_day = 25000
-	game.difficulty_settings.recipe_difficulty = 0
-	game.forces["enemy"].friendly_fire = false
+
+	reset_global_settings()
 end
 ------------------------------------------------------------------------------------------
 local on_player_toggled_map_editor = function(event)
