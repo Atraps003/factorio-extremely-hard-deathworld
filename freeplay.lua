@@ -349,10 +349,13 @@ function s_location()
 	end
 end
 ------------------------------------------------------------------------------------------------
-function reset()
-	if (global.restart == "true" or game.console_command_used == true) then
+function reset(reason)
+	local reset_type = nil
+	if (global.restart == "true") then
+		reset_type = "[color=red][font=default-large-bold]Hard reset[/font][/color]"
 		game.write_file("reset/reset.log", "restart", false, 0)
 	else
+		reset_type = "[color=green][font=default-large-bold]Soft reset[/font][/color]"
 		local victory = game.finished_but_continuing
 		local red = game.forces["player"].item_production_statistics.get_output_count "automation-science-pack"
 		local deaths = game.forces["player"].kill_count_statistics.get_output_count "character"
@@ -361,6 +364,10 @@ function reset()
 		game.surfaces[1].clear(true)
 		game.forces["player"].reset()
 		global.tick_to_start_charting_spawn = game.tick + 1
+	end
+
+	if reason ~= nil then
+		game.print(string.format("%s [color=yellow]%s[/color]", reset_type, reason))
 	end
 end
 -----------------------------------------------------------------------------------------------
@@ -397,16 +404,25 @@ end
 ------------------------------------------------------------------------------------------
 local on_player_toggled_map_editor = function(event)
 	global.restart = "true"
-	reset()
+
+	local player = game.get_player(event.player_index)
+	reset(string.format("%s has toggled the map editor.", player.name))
 end
 ------------------------------------------------------------------------------------------
 local on_console_command = function(event)
-	local x = event
-	--	local name = game.get_player(x.player_index).name
-	local command = x.command
-	local parameters = x.parameters
+	local command = event.command
+	local parameters = event.parameters
 	print(command)
 	print(parameters)
+
+	if (command == "c" or command == "command") and game.console_command_used then
+		global.restart = "true"
+		local name = nil
+		if event.player_index ~= nil then
+			name = game.get_player(event.player_index).name
+		end
+		reset(string.format("%s has used a console command.", name or "SERVER"))
+	end
 end
 --------------------------------------------------------------------------------------------
 local on_unit_group_finished_gathering = function(event)
@@ -577,15 +593,12 @@ script.on_nth_tick(36000, function()
 	if (evo > 0.034) then
 		game.map_settings.enemy_expansion.settler_group_min_size = 90
 		game.map_settings.enemy_expansion.settler_group_max_size  = 100
-	end
-	---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-	if game.ticks_played > 36288000 then
-		reset()
-	end
-	if game.console_command_used == true then
-		reset()
-	end
-end)
+		end
+		---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+		if game.ticks_played > 36288000 then
+			reset("Game has reached its maximum playtime of 7 days.")
+		end
+	end)
 
 -------------------------------------------------------------------------------------------------------------------
 script.on_event(defines.events.on_post_entity_died,
@@ -673,9 +686,8 @@ local on_biter_base_built = function(event)
 	end
 	create_worm()
 	if (oxpos > -32 and oxpos < 32 and oypos > -32 and oypos < 32) then
-		reset()
+		reset("Biters have nested at spawn!")
 	end
-	--	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------------
 local on_rocket_launched = function(event)
