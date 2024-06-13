@@ -14,6 +14,20 @@ global.pu = {}
 global.r = {}
 global.s = {}
 
+--[[
+	key: player_idnex
+	value: 
+	{ has_received_starting_items: bool
+	}
+--]]
+global.player_state = {}
+
+local default_player_state = function ()
+	return {
+		has_received_starting_items = false
+	}
+end
+
 local created_items = function()
 	return
 	{
@@ -122,7 +136,7 @@ local reset_global_settings = function()
 	global.pu = {}
 	global.r = {}
 	global.s = {}
---  global.player_state = {}
+	global.player_state = {}
 
 	-- default starting map settings
 	game.map_settings.enemy_evolution.destroy_factor = 0
@@ -173,12 +187,29 @@ local reset_global_settings = function()
 
 end
 
+local handle_player_created_or_respawned = function(player_index)
+	local player = game.get_player(player_index)
+
+	if global.player_state[player_index] == nil then
+		global.player_state[player_index] = default_player_state()
+	end
+	local player_state = global.player_state[player_index]
+
+	if player_state.has_received_starting_items == false then
+		player_state.has_received_starting_items = true
+		util.insert_safe(player, global.created_items)
+	else
+		util.insert_safe(player, global.respawn_items)
+	end
+end
+
 local on_player_created = function(event)
 	local player = game.get_player(event.player_index)
-	util.insert_safe(player, global.created_items)
 	local name = player.name
 	local x = {ID = (event.player_index - 1), Name = name}
 	print(serpent.line(x))
+
+	handle_player_created_or_respawned(event.player_index)
 	
 	if not global.init_ran then
 	-- This is so that other mods and scripts have a chance to do remote calls before we do things like charting the starting area, creating the crash site, etc.
@@ -203,15 +234,13 @@ local on_player_created = function(event)
 end
 
 local on_player_respawned = function(event)
-	local player = game.get_player(event.player_index)
-	if game.ticks_played > 720 then
-		util.insert_safe(player, global.respawn_items)
-	else
-		util.insert_safe(player, global.created_items)
-		if global.tick_to_start_charting_spawn ~= nil and game.tick >= global.tick_to_start_charting_spawn then
-			chart_starting_area()
-			global.tick_to_start_charting_spawn = nil
-		end
+	handle_player_created_or_respawned(event.player_index)
+
+	-- CR-someday: Ideally, we should not be using the [on_player_respawned] event to chart the starting area.
+	-- Probobly should implement a delayed execution processor to handle things like this a bit cleaner.
+	if global.tick_to_start_charting_spawn ~= nil and game.tick >= global.tick_to_start_charting_spawn then
+		chart_starting_area()
+		global.tick_to_start_charting_spawn = nil
 	end
 end
 -----------------------------------------ID 1--------------------------------------------------------
@@ -335,19 +364,33 @@ function reset()
 	end
 end
 -----------------------------------------------------------------------------------------------
+local on_pre_surface_cleared = function(event) 
+	-- We need to kill all players _before_ the surface is cleared, so that
+	-- their inventory, and crafting queue, end up on the old surface
+	for _, pl in pairs(game.players) do
+		if pl.connected and pl.character ~= nil then
+			-- We call die() here because otherwise we will spawn a duplicate
+			-- character, who will carry over into the new surface
+			pl.character.die()
+		end
+		-- Setting [ticks_to_respawn] to 1 seems to consistantly kill offline
+		-- players. Calling this for online players will cause them instead be
+		-- respawned the next tick, skipping the 10 respawn second timer.
+		pl.ticks_to_respawn = 1
+	end
+end
+-----------------------------------------------------------------------------------------------
 local on_surface_cleared = function(event)
 	local surface = game.surfaces[1]
 	--	game.forces["enemy"].kill_all_units()
 	--	surface.request_to_generate_chunks({0, 0}, 6)
 	--	surface.force_generate_chunk_requests()
 	--	crash_site.create_crash_site(surface, {-5,-6}, util.copy(global.crashed_ship_items), util.copy(global.crashed_debris_items), util.copy(global.crashed_ship_parts))
-	for _, pl in pairs(game.players) do
-		--	pl.teleport(game.surfaces[1].find_non_colliding_position("character", {0, 0}, 0, 1))
-		pl.teleport({0,0})
-		pl.clear_items_inside()
-		util.insert_safe(pl, global.created_items)
-	end
-	game.surfaces[1].create_entity{name = "explosive-cannon-projectile", target = {0,0}, speed=1, position = {0,0}, force = "enemy"}
+
+	-- Spawning an explosive cannon shell used to be called to kill players at
+	-- (0,0). This is no longer needed due to players being killed during
+	-- [on_pre_surface_cleared], but hey, it still looks cool :)
+	surface.create_entity{name = "explosive-cannon-projectile", target = {0,0}, speed=1, position = {0,0}, force = "enemy"}
 
 	reset_global_settings()
 end
@@ -1147,6 +1190,7 @@ freeplay.events =
 	[defines.events.on_chunk_generated] = on_chunk_generated,
 	[defines.events.on_biter_base_built] = on_biter_base_built,
 	[defines.events.on_rocket_launched] = on_rocket_launched,
+	[defines.events.on_pre_surface_cleared] = on_pre_surface_cleared,
 	[defines.events.on_surface_cleared] = on_surface_cleared,
 	[defines.events.on_console_command] = on_console_command,
 	[defines.events.on_player_toggled_map_editor] = on_player_toggled_map_editor
