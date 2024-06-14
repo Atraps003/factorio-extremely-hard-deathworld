@@ -340,9 +340,9 @@ end
 local on_surface_cleared = function(event)
 	local surface = game.surfaces[1]
 	--	game.forces["enemy"].kill_all_units()
-		surface.request_to_generate_chunks({0, 0}, 6)
-		surface.force_generate_chunk_requests()
-		crash_site.create_crash_site(surface, {-5,-6}, util.copy(global.crashed_ship_items), util.copy(global.crashed_debris_items), util.copy(global.crashed_ship_parts))
+	surface.request_to_generate_chunks({0, 0}, 6)
+	surface.force_generate_chunk_requests()
+	crash_site.create_crash_site(surface, {-5,-6}, util.copy(global.crashed_ship_items), util.copy(global.crashed_debris_items), util.copy(global.crashed_ship_parts))
 
 	-- Spawning an explosive cannon shell used to be called to kill players at
 	-- (0,0). This is no longer needed due to players being killed during
