@@ -120,16 +120,36 @@ local change_seed = function()
 end
 -------------------------------------------------------------------------------------------------------------------------------
 
-local reset_global_settings = function()
+-- Some values need to be reset pre-surface clear, and some need to be set
+-- post-surface clear.
+--
+-- For the most part, settings should be set post-clear, but a few select
+-- variables that control how the game behaves during resets, might need special
+-- care on when it is called.
+local reset_global_setings__pre_surface_clear = function ()
+	-- Altering tiles during a surface clear causes desyncs, this is a known factorio bug.
+	-- See https://forums.factorio.com/viewtopic.php?f=230&t=113601
+
+	-- [on_chunk_generated] checks [converted_shallow_water] to determine if to
+	-- convert water tiles immediately. We need to disable this flag before
+	-- reset, so that reset chunks are not touch until the surface clear is
+	-- fully complete.
+	global.converted_shallow_water = false
+	
+	-- We reset time played before clearing the surface. That way,
+	-- the periodic check that converts all water tiles does not fire until
+	-- after the surface map-generation is fully complete.
+	game.reset_time_played()
+end
+
+local reset_global_settings__post_surface_clear = function()
 	-- clear game statistics
 	game.reset_game_state()
-	game.reset_time_played()
 	game.forces["enemy"].reset()
 	game.forces["enemy"].reset_evolution()
 	game.pollution_statistics.clear()
 
 	-- clear globals
-	global.converted_shallow_water = false
 	global.latch = 0
 	global.w = "small-worm-turret"
 	global.e = "grenade"
@@ -140,6 +160,7 @@ local reset_global_settings = function()
 	global.r = {}
 	global.s = {}
 	global.player_state = {}
+	-- [converted_shallow_water] is reset during [pre_surface_clear] above
 
 	-- default starting map settings
 	game.map_settings.enemy_evolution.destroy_factor = 0
@@ -356,7 +377,9 @@ function reset(reason)
 		local deaths = game.forces["player"].kill_count_statistics.get_output_count "character"
 		game.write_file("reset/reset.log", {"",victory,"_",red,"_",deaths}, false, 0)
 		change_seed()
+
 		game.surfaces[1].clear(true)
+
 		game.forces["player"].reset()
 	end
 
@@ -366,6 +389,8 @@ function reset(reason)
 end
 -----------------------------------------------------------------------------------------------
 local on_pre_surface_cleared = function(event) 
+	reset_global_setings__pre_surface_clear()
+
 	-- We need to kill all players _before_ the surface is cleared, so that
 	-- their inventory, and crafting queue, end up on the old surface
 	for _, pl in pairs(game.players) do
@@ -382,18 +407,13 @@ local on_pre_surface_cleared = function(event)
 end
 -----------------------------------------------------------------------------------------------
 local on_surface_cleared = function(event)
+	reset_global_settings__post_surface_clear()
+
 	local surface = game.surfaces[1]
 	--	game.forces["enemy"].kill_all_units()
 	surface.request_to_generate_chunks({0, 0}, 6)
 	surface.force_generate_chunk_requests()
 	crash_site.create_crash_site(surface, {-5,-6}, util.copy(global.crashed_ship_items), util.copy(global.crashed_debris_items), util.copy(global.crashed_ship_parts))
-
-	-- Spawning an explosive cannon shell used to be called to kill players at
-	-- (0,0). This is no longer needed due to players being killed during
-	-- [on_pre_surface_cleared], but hey, it still looks cool :)
-	surface.create_entity{name = "explosive-cannon-projectile", target = {0,0}, speed=1, position = {0,0}, force = "enemy"}
-
-	reset_global_settings()
 end
 ------------------------------------------------------------------------------------------
 local on_player_toggled_map_editor = function(event)
@@ -670,7 +690,7 @@ function convert_shallow_water_in_area(target_area)
 end
 
 local on_chunk_generated = function(event)
-	if game.ticks_played >= SHALLOW_WATER_CONVERSION_DELAY then
+	if global.converted_shallow_water then
 		convert_shallow_water_in_area(event.area)
 	end
 end
