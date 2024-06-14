@@ -68,7 +68,51 @@ local ship_parts = function()
 	return crash_site.default_ship_parts()
 end
 
-local chart_starting_area =  change_seed = function()
+local chart_starting_area = function()
+	local r = global.chart_distance or 200
+	local force = game.forces.player
+	local surface = game.surfaces[1]
+	local origin = force.get_spawn_position(surface)
+	force.chart(surface, {{origin.x - r, origin.y - r}, {origin.x + r, origin.y + r}})
+end
+
+-----------------------------------------------------------------------------------------------------------------
+local map_gen_1 = function()
+	local surface = game.surfaces[1]
+	local iron = "iron-ore"
+	local copper = "copper-ore"
+	local coal = "coal"
+	local stone = "stone"
+	local oil = "crude-oil"
+	local uranium = "uranium-ore"
+	local enemy = "enemy-base"
+	local mgs = surface.map_gen_settings
+	mgs.water = "1"
+	mgs.terrain_segmentation = "1"
+	mgs.autoplace_controls[iron].size = "10"
+	mgs.autoplace_controls[iron].frequency = "1"
+	mgs.autoplace_controls[iron].richness = "1"
+	mgs.autoplace_controls[copper].size = "10"
+	mgs.autoplace_controls[copper].frequency = "1"
+	mgs.autoplace_controls[copper].richness = "1"
+	mgs.autoplace_controls[coal].size = "10"
+	mgs.autoplace_controls[coal].frequency = "1"
+	mgs.autoplace_controls[coal].richness = "1"
+	mgs.autoplace_controls[stone].size = "10"
+	mgs.autoplace_controls[stone].frequency = "1"
+	mgs.autoplace_controls[stone].richness = "1"
+	mgs.autoplace_controls[oil].size = "10"
+	mgs.autoplace_controls[oil].frequency = "10"
+	mgs.autoplace_controls[oil].richness = "0.05"
+	mgs.autoplace_controls[uranium].size = "4"
+	mgs.autoplace_controls[uranium].frequency = "0.1"
+	mgs.autoplace_controls[uranium].richness = "1"
+	mgs.autoplace_controls[enemy].size = "6"
+	mgs.autoplace_controls[enemy].frequency = "1"
+	surface.map_gen_settings = mgs
+end
+
+local change_seed = function()
 	local surface = game.surfaces[1]
 	local mgs = surface.map_gen_settings
 	mgs.seed = math.random(1111,999999999)
