@@ -211,6 +211,11 @@ local reset_global_settings__post_surface_clear = function()
 
 end
 
+local reset_global_settings = function ()
+	reset_global_setings__pre_surface_clear()
+	reset_global_settings__post_surface_clear()
+end
+
 local handle_player_created_or_respawned = function(player_index)
 	local player = game.get_player(player_index)
 
