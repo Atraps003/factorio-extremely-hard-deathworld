@@ -415,7 +415,7 @@ local on_console_command = function(event)
 	print(command)
 	print(parameters)
 
-	if (command == "c" or command == "command") and game.console_command_used then
+	if (game.console_command_used and global.restart ~= "true") then
 		global.restart = "true"
 		local name = nil
 		if event.player_index ~= nil then
