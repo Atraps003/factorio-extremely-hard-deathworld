@@ -4,7 +4,6 @@ local crash_site = require("crash-site")
 local SHALLOW_WATER_CONVERSION_DELAY = 300
 
 global.restart = "false"
-global.tick_to_start_charting_spawn = nil
 global.converted_shallow_water = false
 
 global.latch = 0
@@ -238,12 +237,6 @@ end
 
 local on_player_respawned = function(event)
 	handle_player_created_or_respawned(event.player_index)
-
-	-- CR-someday: Ideally, we should not be using the [on_player_respawned] event to chart the starting area.
-	-- Probobly should implement a delayed execution processor to handle things like this a bit cleaner.
-	if global.tick_to_start_charting_spawn ~= nil and game.tick >= global.tick_to_start_charting_spawn then
-		global.tick_to_start_charting_spawn = nil
-	end
 end
 -----------------------------------------ID 1--------------------------------------------------------
 function f_location()
@@ -365,7 +358,6 @@ function reset(reason)
 		change_seed()
 		game.surfaces[1].clear(true)
 		game.forces["player"].reset()
-		global.tick_to_start_charting_spawn = game.tick + 1
 	end
 
 	if reason ~= nil then
