@@ -1,8 +1,11 @@
 local util = require("util")
 local crash_site = require("crash-site")
 
+local SHALLOW_WATER_CONVERSION_DELAY = 300
+
 global.restart = "false"
 global.tick_to_start_charting_spawn = nil
+global.converted_shallow_water = false
 
 global.latch = 0
 global.w = "small-worm-turret"
@@ -127,6 +130,7 @@ local reset_global_settings = function()
 	game.pollution_statistics.clear()
 
 	-- clear globals
+	global.converted_shallow_water = false
 	global.latch = 0
 	global.w = "small-worm-turret"
 	global.e = "grenade"
@@ -558,6 +562,16 @@ local on_unit_group_finished_gathering = function(event)
 	end
 end
 -------------------------------------------------------------------------------------------
+script.on_nth_tick(60, function()
+	local surface = game.surfaces[1]
+	if not global.converted_shallow_water and game.ticks_played > SHALLOW_WATER_CONVERSION_DELAY then
+		global.converted_shallow_water = true
+		for chunk in surface.get_chunks() do
+			convert_shallow_water_in_area(chunk.area)	
+		end
+	end
+end)
+
 script.on_nth_tick(36000, function()
 	local evo = game.forces["enemy"].evolution_factor
 	local kills = game.forces["player"].kill_count_statistics.get_flow_count{name="medium-biter",input=true,precision_index=defines.flow_precision_index.ten_minutes} + game.forces["player"].kill_count_statistics.get_flow_count{name="big-biter",input=true,precision_index=defines.flow_precision_index.ten_minutes} + game.forces["player"].kill_count_statistics.get_flow_count{name="behemoth-biter",input=true,precision_index=defines.flow_precision_index.ten_minutes} + (game.forces["player"].kill_count_statistics.get_flow_count{name="small-biter",input=true,precision_index=defines.flow_precision_index.ten_minutes} * 0.5)
@@ -649,22 +663,24 @@ end
 )
 script.set_event_filter( defines.events.on_robot_built_entity, {{filter = "name", name = "pumpjack"}, {filter = "name", name = "nuclear-reactor"}, {filter = "name", name = "flamethrower-turret"}})
 -------------------------------------------------------------------------------------------------------------------------
-local on_chunk_generated = function(event)
-	local chunk_area = event.area
+function convert_shallow_water_in_area(target_area)
+	local surface = game.surfaces[1]
 	local set_water_shallow = {}
 	local set_water_mud = {}
-	local water_count = 0
-	local deepwater_count = 0
-	for k, tile in pairs (game.surfaces[1].find_tiles_filtered{name = "water", area = chunk_area}) do
-		water_count = water_count + 1
-		set_water_shallow[water_count] = {name = "water-shallow", position = tile.position}
+	for k, tile in pairs (surface.find_tiles_filtered{name = "water", area = target_area}) do
+		set_water_shallow[#set_water_shallow + 1] = {name = "water-shallow", position = tile.position}
 	end
-	for k, tile in pairs (game.surfaces[1].find_tiles_filtered{name = "deepwater", area = chunk_area}) do
-		deepwater_count = deepwater_count + 1
-		set_water_mud[deepwater_count] = {name = "water-mud", position = tile.position}
+	for k, tile in pairs (surface.find_tiles_filtered{name = "deepwater", area = target_area}) do
+		set_water_mud[#set_water_mud + 1] = {name = "water-mud", position = tile.position}
 	end
-	game.surfaces[1].set_tiles(set_water_shallow)
-	game.surfaces[1].set_tiles(set_water_mud)
+	surface.set_tiles(set_water_shallow)
+	surface.set_tiles(set_water_mud)
+end
+
+local on_chunk_generated = function(event)
+	if game.ticks_played >= SHALLOW_WATER_CONVERSION_DELAY then
+		convert_shallow_water_in_area(event.area)
+	end
 end
 ----------------------------------------------------------------------------------------------------------
 local on_biter_base_built = function(event)
