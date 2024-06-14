@@ -1,7 +1,7 @@
 local util = require("util")
 local crash_site = require("crash-site")
 
-local SHALLOW_WATER_CONVERSION_DELAY = 300
+local SHALLOW_WATER_CONVERSION_DELAY = 60
 
 global.restart = "false"
 global.converted_shallow_water = false
