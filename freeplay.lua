@@ -221,7 +221,6 @@ local on_player_created = function(event)
 		
 		reset_global_settings()
 
-		chart_starting_area()
 		--	map_gen_1()
 
 		if not global.disable_crashsite then
@@ -243,7 +242,6 @@ local on_player_respawned = function(event)
 	-- CR-someday: Ideally, we should not be using the [on_player_respawned] event to chart the starting area.
 	-- Probobly should implement a delayed execution processor to handle things like this a bit cleaner.
 	if global.tick_to_start_charting_spawn ~= nil and game.tick >= global.tick_to_start_charting_spawn then
-		chart_starting_area()
 		global.tick_to_start_charting_spawn = nil
 	end
 end
@@ -569,6 +567,8 @@ script.on_nth_tick(60, function()
 		for chunk in surface.get_chunks() do
 			convert_shallow_water_in_area(chunk.area)	
 		end
+
+		chart_starting_area()
 	end
 end)
 
