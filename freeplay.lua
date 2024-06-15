@@ -791,24 +791,24 @@ local on_research_finished = function(event)
 		game.forces["player"].set_gun_speed_modifier("laser", 7)
 	end
 	--------------------------------------------------------------------------------------------------------------------------------------------------------------
-	--  if (event.research.name == "physical-projectile-damage-1") then
-	--  game.forces["player"].set_turret_attack_modifier("gun-turret", 0)
-	--  end
-	--  if (event.research.name == "physical-projectile-damage-2") then
-	--  game.forces["player"].set_turret_attack_modifier("gun-turret", 0)
-	--  end
-	--  if (event.research.name == "physical-projectile-damage-3") then
-	--  game.forces["player"].set_turret_attack_modifier("gun-turret", 0)
-	--  end
-	--  if (event.research.name == "physical-projectile-damage-4") then
-	--  game.forces["player"].set_turret_attack_modifier("gun-turret", 0)
-	--  end
-	--  if (event.research.name == "physical-projectile-damage-5") then
-	--  game.forces["player"].set_turret_attack_modifier("gun-turret", 0)
-	--  end
-	--  if (event.research.name == "physical-projectile-damage-6") then
-	--  game.forces["player"].set_turret_attack_modifier("gun-turret", 0)
-	--  end
+	if (event.research.name == "physical-projectile-damage-1") then
+	game.forces["player"].set_turret_attack_modifier("gun-turret", 0)
+	end
+	if (event.research.name == "physical-projectile-damage-2") then
+	game.forces["player"].set_turret_attack_modifier("gun-turret", 0)
+	end
+	if (event.research.name == "physical-projectile-damage-3") then
+	game.forces["player"].set_turret_attack_modifier("gun-turret", 0)
+	end
+	if (event.research.name == "physical-projectile-damage-4") then
+	game.forces["player"].set_turret_attack_modifier("gun-turret", 0)
+	end
+	if (event.research.name == "physical-projectile-damage-5") then
+	game.forces["player"].set_turret_attack_modifier("gun-turret", 0)
+	end
+	if (event.research.name == "physical-projectile-damage-6") then
+	game.forces["player"].set_turret_attack_modifier("gun-turret", 0)
+	end
 	---------------------------------------------------------------------------------------------------------
 	--  if (event.research.name == "stronger-explosives-2") then
 	--  game.forces["player"].set_ammo_damage_modifier("landmine", 0)
