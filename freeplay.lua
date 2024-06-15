@@ -583,6 +583,8 @@ script.on_nth_tick(36000, function()
 	local kills = game.forces["player"].kill_count_statistics.get_flow_count{name="medium-biter",input=true,precision_index=defines.flow_precision_index.ten_minutes} + game.forces["player"].kill_count_statistics.get_flow_count{name="big-biter",input=true,precision_index=defines.flow_precision_index.ten_minutes} + game.forces["player"].kill_count_statistics.get_flow_count{name="behemoth-biter",input=true,precision_index=defines.flow_precision_index.ten_minutes} + (game.forces["player"].kill_count_statistics.get_flow_count{name="small-biter",input=true,precision_index=defines.flow_precision_index.ten_minutes} * 0.5)
 	local pollution = game.pollution_statistics.get_flow_count{name="biter-spawner",output=true,precision_index=defines.flow_precision_index.ten_minutes}
 	local iron = game.forces["player"].item_production_statistics.get_flow_count{name="iron-ore",input=true,precision_index=defines.flow_precision_index.one_hour}
+	local tpd = ((evo + 1) * 25000)
+	game.surfaces[1].ticks_per_day = tpd
 	---------------------------------------------------------------------------------------------------------------------------------
 	if (evo > 0.2 and evo < 0.5) then
 		game.map_settings.enemy_evolution.time_factor = 0.00005
@@ -728,8 +730,8 @@ end
 local on_research_finished = function(event)
 	
 	-----------------------------------------------------------------------------------------------------------
-	local tpd = (((game.forces["player"].mining_drill_productivity_bonus * 10) + 1) * 25000)
-	game.surfaces[1].ticks_per_day = tpd
+	-- local tpd = (((game.forces["player"].mining_drill_productivity_bonus * 10) + 1) * 25000)
+	-- game.surfaces[1].ticks_per_day = tpd
 	
 	-----------------------------------------------------------------------------------------------------------
 	--  if (game.forces["enemy"].evolution_factor > 0.07 and game.forces["enemy"].evolution_factor <= 0.19) then
