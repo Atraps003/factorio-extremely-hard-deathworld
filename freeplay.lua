@@ -791,6 +791,25 @@ local on_research_finished = function(event)
 		game.forces["player"].set_gun_speed_modifier("laser", 7)
 	end
 	--------------------------------------------------------------------------------------------------------------------------------------------------------------
+	if (event.research.name == "energy-weapons-damage-1") then
+		game.forces["player"].set_turret_attack_modifier("laser-turret", 0.2)
+	end
+	if (event.research.name == "energy-weapons-damage-2") then
+		game.forces["player"].set_turret_attack_modifier("laser-turret", 0.4)
+	end
+	if (event.research.name == "energy-weapons-damage-3") then
+		game.forces["player"].set_turret_attack_modifier("laser-turret", 0.7)
+	end
+	if (event.research.name == "energy-weapons-damage-4") then
+		game.forces["player"].set_turret_attack_modifier("laser-turret", 1.1)
+	end
+	if (event.research.name == "energy-weapons-damage-5") then
+		game.forces["player"].set_turret_attack_modifier("laser-turret", 1.6)
+	end
+	if (event.research.name == "energy-weapons-damage-6") then
+		game.forces["player"].set_turret_attack_modifier("laser-turret", 2.3)
+	end
+	------------------------------------------------------------------------------------
 	if (event.research.name == "physical-projectile-damage-1") then
 	game.forces["player"].set_turret_attack_modifier("gun-turret", 0)
 	end
