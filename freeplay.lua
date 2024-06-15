@@ -166,6 +166,7 @@ local reset_global_settings = function()
 
 	game.forces["enemy"].friendly_fire = false
 	game.forces["player"].research_queue_enabled = true
+	game.difficulty_settings.technology_price_multiplier = 1
 
 --  game.map_settings.enemy_expansion.max_expansion_distance = 1
 --  game.map_settings.enemy_expansion.friendly_base_influence_radius = 0
@@ -728,6 +729,7 @@ end
 --end
 -------------------------------------------------------------------------------------------------------------------------------------------
 local on_research_finished = function(event)
+	game.difficulty_settings.technology_price_multiplier = 1
 	
 	-----------------------------------------------------------------------------------------------------------
 	-- local tpd = (((game.forces["player"].mining_drill_productivity_bonus * 10) + 1) * 25000)
@@ -872,6 +874,16 @@ end
 --  game.forces["player"].set_turret_attack_modifier("flamethrower-turret", -evo_flame)
 --  end
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+local on_research_cancelled = function(event)
+	game.difficulty_settings.technology_price_multiplier = 1
+end
+-------------------------------------------------------------------------------------------
+local on_research_started = function(event)
+	if (event.research.name == "nuclear-power") then
+		game.difficulty_settings.technology_price_multiplier = 0.5
+	end
+end
+-------------------------------------------------------------------------------------------
 local on_cutscene_waypoint_reached = function(event)
 	if not global.crash_site_cutscene_active then return end
 	if not crash_site.is_crash_site_cutscene(event) then return end
@@ -1246,7 +1258,9 @@ freeplay.events =
 	[defines.events.on_pre_surface_cleared] = on_pre_surface_cleared,
 	[defines.events.on_surface_cleared] = on_surface_cleared,
 	[defines.events.on_console_command] = on_console_command,
-	[defines.events.on_player_toggled_map_editor] = on_player_toggled_map_editor
+	[defines.events.on_player_toggled_map_editor] = on_player_toggled_map_editor,
+	[defines.events.on_research_cancelled] = on_research_cancelled,
+	[defines.events.on_research_started] = on_research_started
 	
 }
 
