@@ -869,6 +869,28 @@ local on_research_finished = function(event)
 	if (event.research.name == "refined-flammables-6") then
 		game.forces["player"].set_turret_attack_modifier("flamethrower-turret", 0)
 	end
+	--------------------------------------------------------------------------------------------
+	if (event.research.name == "worker-robots-speed-1") then
+		game.forces["player"].worker_robots_speed_modifier = 0.7
+		game.forces["player"].worker_robots_battery_modifier = 0.35
+	end
+	if (event.research.name == "worker-robots-speed-2") then
+		game.forces["player"].worker_robots_speed_modifier = 1.5
+		game.forces["player"].worker_robots_battery_modifier = 0.75
+	end
+	if (event.research.name == "worker-robots-speed-3") then
+		game.forces["player"].worker_robots_speed_modifier = 2.4
+		game.forces["player"].worker_robots_battery_modifier = 1.2
+	end
+	if (event.research.name == "worker-robots-speed-4") then
+		game.forces["player"].worker_robots_speed_modifier = 3.5
+		game.forces["player"].worker_robots_battery_modifier = 1.75
+	end
+	if (event.research.name == "worker-robots-speed-5") then
+		game.forces["player"].worker_robots_speed_modifier = 4.8
+		game.forces["player"].worker_robots_battery_modifier = 2.4
+	end
+	--------------------------------------------------------------------------------------------
 	if (event.research.name == "rocket-silo") then
 		game.difficulty_settings.recipe_difficulty = 1
 	end
