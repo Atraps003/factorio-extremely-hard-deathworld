@@ -167,6 +167,7 @@ local reset_global_settings = function()
 	game.forces["enemy"].friendly_fire = false
 	game.forces["player"].research_queue_enabled = true
 	game.difficulty_settings.technology_price_multiplier = 1
+	game.difficulty_settings.recipe_difficulty = 1
 
 --  game.map_settings.enemy_expansion.max_expansion_distance = 1
 --  game.map_settings.enemy_expansion.friendly_base_influence_radius = 0
