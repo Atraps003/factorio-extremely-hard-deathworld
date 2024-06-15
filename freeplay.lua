@@ -142,8 +142,8 @@ local reset_global_settings = function()
 
 	-- default starting map settings
 	game.map_settings.enemy_evolution.destroy_factor = 0
-	game.map_settings.enemy_evolution.pollution_factor = 0.0000009
-	game.map_settings.enemy_evolution.time_factor = 0.00002
+	game.map_settings.enemy_evolution.pollution_factor = 0
+	game.map_settings.enemy_evolution.time_factor = 0.00003
 	game.map_settings.enemy_expansion.enabled = true
 	game.map_settings.enemy_expansion.max_expansion_cooldown  = 4000
 	game.map_settings.enemy_expansion.min_expansion_cooldown  = 3000
