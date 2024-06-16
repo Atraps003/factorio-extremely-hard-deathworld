@@ -266,7 +266,7 @@ function f_location()
 		if rf[1][4] == 0 then
 			rf[1][2] = rf[1][2] - 40
 			rf[1][4] = nil
-			if math.random(1,2) == 2
+			if math.random(1,2) == 2 then
 				rf[1][1] = rf[1][1] - 40
 			else
 				rf[1][1] = rf[1][1] + 40
@@ -275,7 +275,7 @@ function f_location()
 		if rf[1][4] == 2 then
 			rf[1][1] = rf[1][1] + 40
 			rf[1][4] = nil
-			if math.random(1,2) == 2
+			if math.random(1,2) == 2 then
 				rf[1][2] = rf[1][2] - 40
 			else
 				rf[1][2] = rf[1][2] + 40
@@ -284,7 +284,7 @@ function f_location()
 		if rf[1][4] == 4 then
 			rf[1][2] = rf[1][2] + 40
 			rf[1][4] = nil
-			if math.random(1,2) == 2
+			if math.random(1,2) == 2 then
 				rf[1][1] = rf[1][1] - 40
 			else
 				rf[1][1] = rf[1][1] + 40
@@ -293,7 +293,7 @@ function f_location()
 		if rf[1][4] == 6 then
 			rf[1][1] = rf[1][1] - 40
 			rf[1][4] = nil
-			if math.random(1,2) == 2
+			if math.random(1,2) == 2 then
 				rf[1][2] = rf[1][2] - 40
 			else
 				rf[1][2] = rf[1][2] + 40
