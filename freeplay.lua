@@ -143,7 +143,7 @@ local reset_global_settings = function()
 	-- default starting map settings
 	game.map_settings.enemy_evolution.destroy_factor = 0
 	game.map_settings.enemy_evolution.pollution_factor = 0
-	game.map_settings.enemy_evolution.time_factor = 0.00003
+	game.map_settings.enemy_evolution.time_factor = 0.00005
 	game.map_settings.enemy_expansion.enabled = true
 	game.map_settings.enemy_expansion.max_expansion_cooldown  = 4000
 	game.map_settings.enemy_expansion.min_expansion_cooldown  = 3000
@@ -591,7 +591,7 @@ script.on_nth_tick(36000, function()
 	game.surfaces[1].ticks_per_day = tpd
 	---------------------------------------------------------------------------------------------------------------------------------
 	if (evo > 0.2 and evo < 0.5) then
-		game.map_settings.enemy_evolution.time_factor = 0.00005
+		game.map_settings.enemy_evolution.time_factor = 0.00007
 		global.w = "medium-worm-turret"
 	end
 	if (evo > 0.5 and evo < 0.7) then
@@ -617,15 +617,15 @@ script.on_nth_tick(36000, function()
 		game.map_settings.pollution.ageing = (game.map_settings.pollution.ageing * 0.8)
 	end
 	------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-	if (evo > 0.034) then
+	if (evo > 0.081) then
 		game.map_settings.enemy_expansion.settler_group_min_size = 90
 		game.map_settings.enemy_expansion.settler_group_max_size  = 100
-		end
-		---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-		if game.ticks_played > 36288000 then
-			reset("Game has reached its maximum playtime of 7 days.")
-		end
-	end)
+	end
+	---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+	if game.ticks_played > 36288000 then
+		reset("Game has reached its maximum playtime of 7 days.")
+	end
+end)
 
 -------------------------------------------------------------------------------------------------------------------
 script.on_event(defines.events.on_post_entity_died,
