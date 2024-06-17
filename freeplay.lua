@@ -1,8 +1,10 @@
 local util = require("util")
 local crash_site = require("crash-site")
 
+local SHALLOW_WATER_CONVERSION_DELAY = 60
+
 global.restart = "false"
-global.tick_to_start_charting_spawn = nil
+global.converted_shallow_water = false
 
 global.latch = 0
 global.exploder = "big-spitter"
@@ -119,10 +121,31 @@ local change_seed = function()
 end
 -------------------------------------------------------------------------------------------------------------------------------
 
-local reset_global_settings = function()
+-- Some values need to be reset pre-surface clear, and some need to be set
+-- post-surface clear.
+--
+-- For the most part, settings should be set post-clear, but a few select
+-- variables that control how the game behaves during resets, might need special
+-- care on when it is called.
+local reset_global_setings__pre_surface_clear = function ()
+	-- Altering tiles during a surface clear causes desyncs, this is a known factorio bug.
+	-- See https://forums.factorio.com/viewtopic.php?f=230&t=113601
+
+	-- [on_chunk_generated] checks [converted_shallow_water] to determine if to
+	-- convert water tiles immediately. We need to disable this flag before
+	-- reset, so that reset chunks are not touch until the surface clear is
+	-- fully complete.
+	global.converted_shallow_water = false
+	
+	-- We reset time played before clearing the surface. That way,
+	-- the periodic check that converts all water tiles does not fire until
+	-- after the surface map-generation is fully complete.
+	game.reset_time_played()
+end
+
+local reset_global_settings__post_surface_clear = function()
 	-- clear game statistics
 	game.reset_game_state()
-	game.reset_time_played()
 	game.forces["enemy"].reset()
 	game.forces["enemy"].reset_evolution()
 	game.pollution_statistics.clear()
@@ -139,6 +162,7 @@ local reset_global_settings = function()
 	global.r = {}
 	global.s = {}
 	global.player_state = {}
+	-- [converted_shallow_water] is reset during [pre_surface_clear] above
 
 	-- default starting map settings
 	game.map_settings.enemy_evolution.destroy_factor = 0
@@ -191,6 +215,11 @@ local reset_global_settings = function()
 
 end
 
+local reset_global_settings = function ()
+	reset_global_setings__pre_surface_clear()
+	reset_global_settings__post_surface_clear()
+end
+
 local handle_player_created_or_respawned = function(player_index)
 	local player = game.get_player(player_index)
 
@@ -221,7 +250,6 @@ local on_player_created = function(event)
 		
 		reset_global_settings()
 
-		chart_starting_area()
 		--	map_gen_1()
 
 		if not global.disable_crashsite then
@@ -239,13 +267,6 @@ end
 
 local on_player_respawned = function(event)
 	handle_player_created_or_respawned(event.player_index)
-
-	-- CR-someday: Ideally, we should not be using the [on_player_respawned] event to chart the starting area.
-	-- Probobly should implement a delayed execution processor to handle things like this a bit cleaner.
-	if global.tick_to_start_charting_spawn ~= nil and game.tick >= global.tick_to_start_charting_spawn then
-		chart_starting_area()
-		global.tick_to_start_charting_spawn = nil
-	end
 end
 -----------------------------------------ID 1--------------------------------------------------------
 function f_location()
@@ -385,9 +406,10 @@ function reset(reason)
 		local deaths = game.forces["player"].kill_count_statistics.get_output_count "character"
 		game.write_file("reset/reset.log", {"",victory,"_",red,"_",deaths}, false, 0)
 		change_seed()
+
 		game.surfaces[1].clear(true)
+
 		game.forces["player"].reset()
-		global.tick_to_start_charting_spawn = game.tick + 1
 	end
 
 	if reason ~= nil then
@@ -396,6 +418,8 @@ function reset(reason)
 end
 -----------------------------------------------------------------------------------------------
 local on_pre_surface_cleared = function(event) 
+	reset_global_setings__pre_surface_clear()
+
 	-- We need to kill all players _before_ the surface is cleared, so that
 	-- their inventory, and crafting queue, end up on the old surface
 	for _, pl in pairs(game.players) do
@@ -412,18 +436,13 @@ local on_pre_surface_cleared = function(event)
 end
 -----------------------------------------------------------------------------------------------
 local on_surface_cleared = function(event)
+	reset_global_settings__post_surface_clear()
+
 	local surface = game.surfaces[1]
 	--	game.forces["enemy"].kill_all_units()
-	--	surface.request_to_generate_chunks({0, 0}, 6)
-	--	surface.force_generate_chunk_requests()
-	--	crash_site.create_crash_site(surface, {-5,-6}, util.copy(global.crashed_ship_items), util.copy(global.crashed_debris_items), util.copy(global.crashed_ship_parts))
-
-	-- Spawning an explosive cannon shell used to be called to kill players at
-	-- (0,0). This is no longer needed due to players being killed during
-	-- [on_pre_surface_cleared], but hey, it still looks cool :)
-	surface.create_entity{name = "explosive-cannon-projectile", target = {0,0}, speed=1, position = {0,0}, force = "enemy"}
-
-	reset_global_settings()
+	surface.request_to_generate_chunks({0, 0}, 6)
+	surface.force_generate_chunk_requests()
+	crash_site.create_crash_site(surface, {-5,-6}, util.copy(global.crashed_ship_items), util.copy(global.crashed_debris_items), util.copy(global.crashed_ship_parts))
 end
 ------------------------------------------------------------------------------------------
 local on_player_toggled_map_editor = function(event)
@@ -582,6 +601,18 @@ local on_unit_group_finished_gathering = function(event)
 	end
 end
 -------------------------------------------------------------------------------------------
+script.on_nth_tick(60, function()
+	local surface = game.surfaces[1]
+	if not global.converted_shallow_water and game.ticks_played > SHALLOW_WATER_CONVERSION_DELAY then
+		global.converted_shallow_water = true
+		for chunk in surface.get_chunks() do
+			convert_shallow_water_in_area(chunk.area)	
+		end
+
+		chart_starting_area()
+	end
+end)
+
 script.on_nth_tick(36000, function()
 	local evo = game.forces["enemy"].evolution_factor
 	local kills = game.forces["player"].kill_count_statistics.get_flow_count{name="medium-biter",input=true,precision_index=defines.flow_precision_index.ten_minutes} + game.forces["player"].kill_count_statistics.get_flow_count{name="big-biter",input=true,precision_index=defines.flow_precision_index.ten_minutes} + game.forces["player"].kill_count_statistics.get_flow_count{name="behemoth-biter",input=true,precision_index=defines.flow_precision_index.ten_minutes} + (game.forces["player"].kill_count_statistics.get_flow_count{name="small-biter",input=true,precision_index=defines.flow_precision_index.ten_minutes} * 0.5)
@@ -676,22 +707,24 @@ end
 )
 script.set_event_filter( defines.events.on_robot_built_entity, {{filter = "name", name = "pumpjack"}, {filter = "name", name = "nuclear-reactor"}, {filter = "name", name = "flamethrower-turret"}})
 -------------------------------------------------------------------------------------------------------------------------
-local on_chunk_generated = function(event)
-	local chunk_area = event.area
+function convert_shallow_water_in_area(target_area)
+	local surface = game.surfaces[1]
 	local set_water_shallow = {}
 	local set_water_mud = {}
-	local water_count = 0
-	local deepwater_count = 0
-	for k, tile in pairs (game.surfaces[1].find_tiles_filtered{name = "water", area = chunk_area}) do
-		water_count = water_count + 1
-		set_water_shallow[water_count] = {name = "water-shallow", position = tile.position}
+	for k, tile in pairs (surface.find_tiles_filtered{name = "water", area = target_area}) do
+		set_water_shallow[#set_water_shallow + 1] = {name = "water-shallow", position = tile.position}
 	end
-	for k, tile in pairs (game.surfaces[1].find_tiles_filtered{name = "deepwater", area = chunk_area}) do
-		deepwater_count = deepwater_count + 1
-		set_water_mud[deepwater_count] = {name = "water-mud", position = tile.position}
+	for k, tile in pairs (surface.find_tiles_filtered{name = "deepwater", area = target_area}) do
+		set_water_mud[#set_water_mud + 1] = {name = "water-mud", position = tile.position}
 	end
-	game.surfaces[1].set_tiles(set_water_shallow)
-	game.surfaces[1].set_tiles(set_water_mud)
+	surface.set_tiles(set_water_shallow)
+	surface.set_tiles(set_water_mud)
+end
+
+local on_chunk_generated = function(event)
+	if global.converted_shallow_water then
+		convert_shallow_water_in_area(event.area)
+	end
 end
 ----------------------------------------------------------------------------------------------------------
 local on_biter_base_built = function(event)
@@ -713,7 +746,7 @@ local on_biter_base_built = function(event)
 	end
 	create_worm()
 	if (oxpos > -32 and oxpos < 32 and oypos > -32 and oypos < 32) then
-		reset("Biters have nested at spawn!")
+		reset("Uh oh... The biters have overtaken your spawn!")
 	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------------
