@@ -193,6 +193,8 @@ local reset_global_settings__post_surface_clear = function()
 
 	game.forces["enemy"].friendly_fire = false
 	game.forces["player"].research_queue_enabled = true
+	game.forces["player"].max_failed_attempts_per_tick_per_construction_queue = 2
+	game.forces["player"].max_successful_attempts_per_tick_per_construction_queue = 6
 	game.difficulty_settings.technology_price_multiplier = 1
 	game.difficulty_settings.recipe_difficulty = 1
 
@@ -203,8 +205,6 @@ local reset_global_settings__post_surface_clear = function()
 --	game.map_settings.enemy_expansion.building_coefficient = 0
 --  game.map_settings.enemy_expansion.max_colliding_tiles_coefficient = 0
 
---	game.forces["player"].max_successful_attempts_per_tick_per_construction_queue = 10
---	game.forces["player"].max_failed_attempts_per_tick_per_construction_queue = 10
 --	game.permissions.get_group('Default').set_allows_action(defines.input_action.add_permission_group, false)
 --	game.permissions.get_group('Default').set_allows_action(defines.input_action.delete_permission_group, false)
 --	game.permissions.get_group('Default').set_allows_action(defines.input_action.edit_permission_group, false)
