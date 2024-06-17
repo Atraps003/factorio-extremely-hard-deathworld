@@ -7,7 +7,6 @@ global.restart = "false"
 global.converted_shallow_water = false
 
 global.latch = 0
-global.exploder = "big-spitter"
 global.w = "small-worm-turret"
 global.e = "grenade"
 global.n = 6
@@ -152,7 +151,6 @@ local reset_global_settings__post_surface_clear = function()
 
 	-- clear globals
 	global.latch = 0
-	global.exploder = "big-spitter"
 	global.w = "small-worm-turret"
 	global.e = "grenade"
 	global.n = 6
@@ -634,7 +632,6 @@ script.on_nth_tick(36000, function()
 	end
 	if (evo > 0.9) then
 		global.w = "behemoth-worm-turret"
-		global.exploder = "behemoth-spitter"
 	end
 	-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 	if (evo > 0.2 and kills < 250 and pollution > 1) then
@@ -675,7 +672,7 @@ function(event)
 	game.surfaces[1].create_entity{name = global.e, target = event.entity.position, speed=1, position = event.entity.position, force = "enemy"}
 end
 )
-script.set_event_filter(defines.events.on_entity_died, {{filter = "name", name = global.exploder}})
+script.set_event_filter(defines.events.on_entity_died, {{filter = "name", name = "behemoth-spitter"}, {filter = "name", name = "big-spitter"}})
 ----------------------------------------------------------------------------------------------------------------------------------
 script.on_event(defines.events.on_built_entity,
 function(event)
