@@ -7,6 +7,7 @@ global.restart = "false"
 global.converted_shallow_water = false
 
 global.latch = 0
+global.exploder = "big-spitter"
 global.w = "small-worm-turret"
 global.e = "grenade"
 global.n = 6
@@ -151,6 +152,7 @@ local reset_global_settings__post_surface_clear = function()
 
 	-- clear globals
 	global.latch = 0
+	global.exploder = "big-spitter"
 	global.w = "small-worm-turret"
 	global.e = "grenade"
 	global.n = 6
@@ -164,8 +166,8 @@ local reset_global_settings__post_surface_clear = function()
 
 	-- default starting map settings
 	game.map_settings.enemy_evolution.destroy_factor = 0
-	game.map_settings.enemy_evolution.pollution_factor = 0.0000009
-	game.map_settings.enemy_evolution.time_factor = 0.00002
+	game.map_settings.enemy_evolution.pollution_factor = 0
+	game.map_settings.enemy_evolution.time_factor = 0.00003
 	game.map_settings.enemy_expansion.enabled = true
 	game.map_settings.enemy_expansion.max_expansion_cooldown  = 4000
 	game.map_settings.enemy_expansion.min_expansion_cooldown  = 3000
@@ -190,6 +192,8 @@ local reset_global_settings__post_surface_clear = function()
 
 	game.forces["enemy"].friendly_fire = false
 	game.forces["player"].research_queue_enabled = true
+	game.difficulty_settings.technology_price_multiplier = 1
+	game.difficulty_settings.recipe_difficulty = 1
 
 --  game.map_settings.enemy_expansion.max_expansion_distance = 1
 --  game.map_settings.enemy_expansion.friendly_base_influence_radius = 0
@@ -283,18 +287,38 @@ function f_location()
 		if rf[1][4] == 0 then
 			rf[1][2] = rf[1][2] - 40
 			rf[1][4] = nil
+			if math.random(1,2) == 2 then
+				rf[1][1] = rf[1][1] - 40
+			else
+				rf[1][1] = rf[1][1] + 40
+			end
 		end
 		if rf[1][4] == 2 then
 			rf[1][1] = rf[1][1] + 40
 			rf[1][4] = nil
+			if math.random(1,2) == 2 then
+				rf[1][2] = rf[1][2] - 40
+			else
+				rf[1][2] = rf[1][2] + 40
+			end
 		end
 		if rf[1][4] == 4 then
 			rf[1][2] = rf[1][2] + 40
 			rf[1][4] = nil
+			if math.random(1,2) == 2 then
+				rf[1][1] = rf[1][1] - 40
+			else
+				rf[1][1] = rf[1][1] + 40
+			end
 		end
 		if rf[1][4] == 6 then
 			rf[1][1] = rf[1][1] - 40
 			rf[1][4] = nil
+			if math.random(1,2) == 2 then
+				rf[1][2] = rf[1][2] - 40
+			else
+				rf[1][2] = rf[1][2] + 40
+			end
 		end
 		local mud = game.surfaces[1].find_tiles_filtered{name = {"water-mud"}, position = {rf[1][1], rf[1][2]}, radius = 16}
 		local shallow = game.surfaces[1].find_tiles_filtered{name = {"water-shallow"}, position = {rf[1][1], rf[1][2]}, radius = 16}
@@ -594,6 +618,8 @@ script.on_nth_tick(36000, function()
 	local kills = game.forces["player"].kill_count_statistics.get_flow_count{name="medium-biter",input=true,precision_index=defines.flow_precision_index.ten_minutes} + game.forces["player"].kill_count_statistics.get_flow_count{name="big-biter",input=true,precision_index=defines.flow_precision_index.ten_minutes} + game.forces["player"].kill_count_statistics.get_flow_count{name="behemoth-biter",input=true,precision_index=defines.flow_precision_index.ten_minutes} + (game.forces["player"].kill_count_statistics.get_flow_count{name="small-biter",input=true,precision_index=defines.flow_precision_index.ten_minutes} * 0.5)
 	local pollution = game.pollution_statistics.get_flow_count{name="biter-spawner",output=true,precision_index=defines.flow_precision_index.ten_minutes}
 	local iron = game.forces["player"].item_production_statistics.get_flow_count{name="iron-ore",input=true,precision_index=defines.flow_precision_index.one_hour}
+	local tpd = ((evo + 1) * 25000)
+	game.surfaces[1].ticks_per_day = tpd
 	---------------------------------------------------------------------------------------------------------------------------------
 	if (evo > 0.2 and evo < 0.5) then
 		game.map_settings.enemy_evolution.time_factor = 0.00005
@@ -608,6 +634,7 @@ script.on_nth_tick(36000, function()
 	end
 	if (evo > 0.9) then
 		global.w = "behemoth-worm-turret"
+		global.exploder = "behemoth-spitter"
 	end
 	-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 	if (evo > 0.2 and kills < 250 and pollution > 1) then
@@ -648,7 +675,7 @@ function(event)
 	game.surfaces[1].create_entity{name = global.e, target = event.entity.position, speed=1, position = event.entity.position, force = "enemy"}
 end
 )
-script.set_event_filter(defines.events.on_entity_died, {{filter = "name", name = "behemoth-spitter"}, {filter = "name", name = "big-spitter"}, {filter = "name", name = "medium-spitter"}, {filter = "name", name = "small-spitter"}})
+script.set_event_filter(defines.events.on_entity_died, {{filter = "name", name = global.exploder}})
 ----------------------------------------------------------------------------------------------------------------------------------
 script.on_event(defines.events.on_built_entity,
 function(event)
@@ -739,10 +766,11 @@ end
 --end
 -------------------------------------------------------------------------------------------------------------------------------------------
 local on_research_finished = function(event)
+	game.difficulty_settings.technology_price_multiplier = 1
 	
 	-----------------------------------------------------------------------------------------------------------
-	local tpd = (((game.forces["player"].mining_drill_productivity_bonus * 10) + 1) * 25000)
-	game.surfaces[1].ticks_per_day = tpd
+	-- local tpd = (((game.forces["player"].mining_drill_productivity_bonus * 10) + 1) * 25000)
+	-- game.surfaces[1].ticks_per_day = tpd
 	
 	-----------------------------------------------------------------------------------------------------------
 	--  if (game.forces["enemy"].evolution_factor > 0.07 and game.forces["enemy"].evolution_factor <= 0.19) then
@@ -802,24 +830,43 @@ local on_research_finished = function(event)
 		game.forces["player"].set_gun_speed_modifier("laser", 7)
 	end
 	--------------------------------------------------------------------------------------------------------------------------------------------------------------
-	--  if (event.research.name == "physical-projectile-damage-1") then
-	--  game.forces["player"].set_turret_attack_modifier("gun-turret", 0)
-	--  end
-	--  if (event.research.name == "physical-projectile-damage-2") then
-	--  game.forces["player"].set_turret_attack_modifier("gun-turret", 0)
-	--  end
-	--  if (event.research.name == "physical-projectile-damage-3") then
-	--  game.forces["player"].set_turret_attack_modifier("gun-turret", 0)
-	--  end
-	--  if (event.research.name == "physical-projectile-damage-4") then
-	--  game.forces["player"].set_turret_attack_modifier("gun-turret", 0)
-	--  end
-	--  if (event.research.name == "physical-projectile-damage-5") then
-	--  game.forces["player"].set_turret_attack_modifier("gun-turret", 0)
-	--  end
-	--  if (event.research.name == "physical-projectile-damage-6") then
-	--  game.forces["player"].set_turret_attack_modifier("gun-turret", 0)
-	--  end
+	if (event.research.name == "energy-weapons-damage-1") then
+		game.forces["player"].set_turret_attack_modifier("laser-turret", 0.2)
+	end
+	if (event.research.name == "energy-weapons-damage-2") then
+		game.forces["player"].set_turret_attack_modifier("laser-turret", 0.4)
+	end
+	if (event.research.name == "energy-weapons-damage-3") then
+		game.forces["player"].set_turret_attack_modifier("laser-turret", 0.7)
+	end
+	if (event.research.name == "energy-weapons-damage-4") then
+		game.forces["player"].set_turret_attack_modifier("laser-turret", 1.1)
+	end
+	if (event.research.name == "energy-weapons-damage-5") then
+		game.forces["player"].set_turret_attack_modifier("laser-turret", 1.6)
+	end
+	if (event.research.name == "energy-weapons-damage-6") then
+		game.forces["player"].set_turret_attack_modifier("laser-turret", 2.3)
+	end
+	------------------------------------------------------------------------------------
+	if (event.research.name == "physical-projectile-damage-1") then
+	game.forces["player"].set_turret_attack_modifier("gun-turret", 0)
+	end
+	if (event.research.name == "physical-projectile-damage-2") then
+	game.forces["player"].set_turret_attack_modifier("gun-turret", 0)
+	end
+	if (event.research.name == "physical-projectile-damage-3") then
+	game.forces["player"].set_turret_attack_modifier("gun-turret", 0)
+	end
+	if (event.research.name == "physical-projectile-damage-4") then
+	game.forces["player"].set_turret_attack_modifier("gun-turret", 0)
+	end
+	if (event.research.name == "physical-projectile-damage-5") then
+	game.forces["player"].set_turret_attack_modifier("gun-turret", 0)
+	end
+	if (event.research.name == "physical-projectile-damage-6") then
+	game.forces["player"].set_turret_attack_modifier("gun-turret", 0)
+	end
 	---------------------------------------------------------------------------------------------------------
 	--  if (event.research.name == "stronger-explosives-2") then
 	--  game.forces["player"].set_ammo_damage_modifier("landmine", 0)
@@ -855,6 +902,28 @@ local on_research_finished = function(event)
 	if (event.research.name == "refined-flammables-6") then
 		game.forces["player"].set_turret_attack_modifier("flamethrower-turret", 0)
 	end
+	--------------------------------------------------------------------------------------------
+	if (event.research.name == "worker-robots-speed-1") then
+		game.forces["player"].worker_robots_speed_modifier = 0.7
+		game.forces["player"].worker_robots_battery_modifier = 0.35
+	end
+	if (event.research.name == "worker-robots-speed-2") then
+		game.forces["player"].worker_robots_speed_modifier = 1.5
+		game.forces["player"].worker_robots_battery_modifier = 0.75
+	end
+	if (event.research.name == "worker-robots-speed-3") then
+		game.forces["player"].worker_robots_speed_modifier = 2.4
+		game.forces["player"].worker_robots_battery_modifier = 1.2
+	end
+	if (event.research.name == "worker-robots-speed-4") then
+		game.forces["player"].worker_robots_speed_modifier = 3.5
+		game.forces["player"].worker_robots_battery_modifier = 1.75
+	end
+	if (event.research.name == "worker-robots-speed-5") then
+		game.forces["player"].worker_robots_speed_modifier = 4.8
+		game.forces["player"].worker_robots_battery_modifier = 2.4
+	end
+	--------------------------------------------------------------------------------------------
 	if (event.research.name == "rocket-silo") then
 		game.difficulty_settings.recipe_difficulty = 1
 	end
@@ -864,6 +933,16 @@ end
 --  game.forces["player"].set_turret_attack_modifier("flamethrower-turret", -evo_flame)
 --  end
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+local on_research_cancelled = function(event)
+	game.difficulty_settings.technology_price_multiplier = 1
+end
+-------------------------------------------------------------------------------------------
+local on_research_started = function(event)
+	if (event.research.name == "nuclear-power") then
+		game.difficulty_settings.technology_price_multiplier = 0.5
+	end
+end
+-------------------------------------------------------------------------------------------
 local on_cutscene_waypoint_reached = function(event)
 	if not global.crash_site_cutscene_active then return end
 	if not crash_site.is_crash_site_cutscene(event) then return end
@@ -1238,7 +1317,9 @@ freeplay.events =
 	[defines.events.on_pre_surface_cleared] = on_pre_surface_cleared,
 	[defines.events.on_surface_cleared] = on_surface_cleared,
 	[defines.events.on_console_command] = on_console_command,
-	[defines.events.on_player_toggled_map_editor] = on_player_toggled_map_editor
+	[defines.events.on_player_toggled_map_editor] = on_player_toggled_map_editor,
+	[defines.events.on_research_cancelled] = on_research_cancelled,
+	[defines.events.on_research_started] = on_research_started
 	
 }
 
