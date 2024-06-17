@@ -53,14 +53,17 @@ end
 local ship_items = function()
 	return
 	{
-		["firearm-magazine"] = 8
+		["firearm-magazine"] = 20,
+		["gun-turret"] = 2
 	}
 end
 
 local debris_items = function()
 	return
 	{
-		["iron-plate"] = 8
+		["iron-plate"] = 8,
+		["burner-mining-drill"] = 15,
+		["stone-furnace"] = 15
 	}
 end
 
