@@ -628,14 +628,14 @@ script.on_nth_tick(36000, function()
 	---------------------------------------------------------------------------------------------------------------------------------
 	if (evo > 0.2 and evo < 0.5) then
 		game.map_settings.enemy_evolution.time_factor = 0.00014
-		global.w = "medium-worm-turret"
 	end
 	if (evo > 0.5 and evo < 0.7) then
 		game.map_settings.enemy_evolution.time_factor = 0.0004
-		global.w = "big-worm-turret"
+		global.w = "medium-worm-turret"
 	end
 	if (evo > 0.7 and evo < 0.9) then
 		game.map_settings.enemy_evolution.time_factor = 0.004
+		global.w = "big-worm-turret"
 	end
 	if (evo > 0.9) then
 		global.w = "behemoth-worm-turret"
