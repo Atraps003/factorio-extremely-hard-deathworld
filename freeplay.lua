@@ -170,12 +170,12 @@ local reset_global_settings__post_surface_clear = function()
 	-- default starting map settings
 	game.map_settings.enemy_evolution.destroy_factor = 0
 	game.map_settings.enemy_evolution.pollution_factor = 0
-	game.map_settings.enemy_evolution.time_factor = 0.00007
+	game.map_settings.enemy_evolution.time_factor = 0.00004
 	game.map_settings.enemy_expansion.enabled = true
 	game.map_settings.enemy_expansion.max_expansion_cooldown  = 4000
 	game.map_settings.enemy_expansion.min_expansion_cooldown  = 3000
-	game.map_settings.enemy_expansion.settler_group_max_size  = 7
-	game.map_settings.enemy_expansion.settler_group_min_size = 5
+	game.map_settings.enemy_expansion.settler_group_max_size  = 10
+	game.map_settings.enemy_expansion.settler_group_min_size = 8
 	game.map_settings.path_finder.general_entity_collision_penalty = 1
 	game.map_settings.path_finder.general_entity_subsequent_collision_penalty = 1
 	game.map_settings.path_finder.ignore_moving_enemy_collision_distance = 0
@@ -626,7 +626,11 @@ script.on_nth_tick(36000, function()
 	local tpd = ((evo + 1) * 25000)
 	game.surfaces[1].ticks_per_day = tpd
 	---------------------------------------------------------------------------------------------------------------------------------
-	if (evo > 0.2 and evo < 0.5) then
+	-- local hours = math.floor((game.ticks_played / 216000) * 100) / 100
+	-- local rounded_evo = math.floor(evo * 100) / 100
+	-- game.write_file("evo", {"",rounded_evo," evo in ",hours," hours\n"}, true, 1)
+	---------------------------------------------------------------------------------------------------------------------------------
+	if (evo > 0.3 and evo < 0.5) then
 		game.map_settings.enemy_evolution.time_factor = 0.00014
 	end
 	if (evo > 0.5 and evo < 0.7) then
@@ -642,21 +646,21 @@ script.on_nth_tick(36000, function()
 		global.behemoth_biter_hp = (math.min((global.behemoth_biter_hp + 1), 99))
 	end
 	-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-	if (evo > 0.2 and kills < 250 and pollution > 1) then
+	if (evo > 0.3 and kills < 250 and pollution > 1) then
 		game.map_settings.pollution.enemy_attack_pollution_consumption_modifier = (math.max((game.map_settings.pollution.enemy_attack_pollution_consumption_modifier * 0.5), 0.01))
 	end
-	if (evo > 0.2 and kills > 290 and pollution > 1) then
+	if (evo > 0.3 and kills > 290 and pollution > 1) then
 		game.map_settings.pollution.enemy_attack_pollution_consumption_modifier = (math.min((game.map_settings.pollution.enemy_attack_pollution_consumption_modifier * 1.2), 0.5))
 	end
 	-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-	if (evo > 0.2 and iron > 60 and pollution < 5) then
+	if (evo > 0.3 and iron > 60 and pollution < 5) then
 		game.map_settings.pollution.ageing = (game.map_settings.pollution.ageing * 0.8)
 	end
 	------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-	if (evo > 0.1) then
-		game.map_settings.enemy_expansion.settler_group_min_size = 90
-		game.map_settings.enemy_expansion.settler_group_max_size  = 100
-	end
+	-- if (evo > 0.1) then
+	-- 	game.map_settings.enemy_expansion.settler_group_min_size = 90
+	-- 	game.map_settings.enemy_expansion.settler_group_max_size  = 100
+	-- end
 	---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 	if game.ticks_played > 36288000 then
 		reset("Game has reached its maximum playtime of 7 days.")
@@ -814,10 +818,10 @@ local on_research_finished = function(event)
 	--  game.forces["enemy"].set_ammo_damage_modifier("biological", 3)
 	--  end
 	------------------------------------------------------------------------------------------------------------------------------------------------------
-	--  if (event.research.name == "chemical-science-pack") then
-	--  game.map_settings.enemy_evolution.time_factor = 0.00003
-	--  game.map_settings.enemy_evolution.pollution_factor = 0.0000012
-	--  end
+	if (event.research.name == "logistic-science-pack") then
+		game.map_settings.enemy_expansion.settler_group_min_size = 90
+		game.map_settings.enemy_expansion.settler_group_max_size  = 100
+	end
 	--  if (event.research.name == "utility-science-pack") then
 	--  game.map_settings.enemy_evolution.time_factor = 0.00006
 	--  game.map_settings.enemy_evolution.pollution_factor = 0.0000013
