@@ -10,7 +10,7 @@ global.latch = 0
 global.w = "small-worm-turret"
 global.e = "grenade"
 global.n = 6
-global.f = {}
+-- global.f = {}
 global.t = {}
 global.pu = {}
 global.r = {}
@@ -158,7 +158,7 @@ local reset_global_settings__post_surface_clear = function()
 	global.w = "small-worm-turret"
 	global.e = "grenade"
 	global.n = 6
-	global.f = {}
+	-- global.f = {}
 	global.t = {}
 	global.pu = {}
 	global.r = {}
@@ -186,14 +186,27 @@ local reset_global_settings__post_surface_clear = function()
 	game.map_settings.unit_group.max_unit_group_size = 300
 
 	local surface = game.surfaces[1]
-	surface.brightness_visual_weights = { 1, 1, 1 }
-	surface.min_brightness = 0
-	surface.dawn = 0.80
-	surface.dusk = 0.20
-	surface.evening = 0.40
-	surface.morning = 0.60
-	surface.daytime = 0.70
-	surface.freeze_daytime = false
+	if math.random(1,2) == 2 then
+		--pitch black nights
+		surface.brightness_visual_weights = { 1, 1, 1 }
+		surface.min_brightness = 0
+		surface.dawn = 0.80
+		surface.dusk = 0.20
+		surface.evening = 0.40
+		surface.morning = 0.60
+		surface.daytime = 0.61
+		surface.freeze_daytime = false
+	else
+		--default nights
+		surface.brightness_visual_weights = { 0, 0, 0 }
+		surface.min_brightness = 0.15
+		surface.dawn = 0.80
+		surface.dusk = 0.20
+		surface.evening = 0.40
+		surface.morning = 0.60
+		surface.daytime = 0.75
+		surface.freeze_daytime = false
+	end
 
 	game.forces["enemy"].friendly_fire = false
 	game.forces["player"].research_queue_enabled = true
@@ -274,65 +287,65 @@ local on_player_respawned = function(event)
 	handle_player_created_or_respawned(event.player_index)
 end
 -----------------------------------------ID 1--------------------------------------------------------
-function f_location()
-	local next = next
-	local fpos = {}
-	local rf = {}
-	for id, f in pairs(global.f) do
-		if f.valid then
-			if f.kills > 200 then
-				table.insert(fpos, {f.position.x, f.position.y, 1, f.direction})
-			end
-		else
-			global.f[id] = nil
-		end
-	end
-	if next(fpos) ~= nil then
-		table.insert(rf, (fpos[math.random(#fpos)]))
-		if rf[1][4] == 0 then
-			rf[1][2] = rf[1][2] - 40
-			rf[1][4] = nil
-			if math.random(1,2) == 2 then
-				rf[1][1] = rf[1][1] - 40
-			else
-				rf[1][1] = rf[1][1] + 40
-			end
-		end
-		if rf[1][4] == 2 then
-			rf[1][1] = rf[1][1] + 40
-			rf[1][4] = nil
-			if math.random(1,2) == 2 then
-				rf[1][2] = rf[1][2] - 40
-			else
-				rf[1][2] = rf[1][2] + 40
-			end
-		end
-		if rf[1][4] == 4 then
-			rf[1][2] = rf[1][2] + 40
-			rf[1][4] = nil
-			if math.random(1,2) == 2 then
-				rf[1][1] = rf[1][1] - 40
-			else
-				rf[1][1] = rf[1][1] + 40
-			end
-		end
-		if rf[1][4] == 6 then
-			rf[1][1] = rf[1][1] - 40
-			rf[1][4] = nil
-			if math.random(1,2) == 2 then
-				rf[1][2] = rf[1][2] - 40
-			else
-				rf[1][2] = rf[1][2] + 40
-			end
-		end
-		local mud = game.surfaces[1].find_tiles_filtered{name = {"water-mud"}, position = {rf[1][1], rf[1][2]}, radius = 16}
-		local shallow = game.surfaces[1].find_tiles_filtered{name = {"water-shallow"}, position = {rf[1][1], rf[1][2]}, radius = 16}
-		if next(mud) ~= nil or next(shallow) ~= nil then
-			rf = nil
-		end
-		return rf
-	end
-end
+-- function f_location()
+-- 	local next = next
+-- 	local fpos = {}
+-- 	local rf = {}
+-- 	for id, f in pairs(global.f) do
+-- 		if f.valid then
+-- 			if f.kills > 200 then
+-- 				table.insert(fpos, {f.position.x, f.position.y, 1, f.direction})
+-- 			end
+-- 		else
+-- 			global.f[id] = nil
+-- 		end
+-- 	end
+-- 	if next(fpos) ~= nil then
+-- 		table.insert(rf, (fpos[math.random(#fpos)]))
+-- 		if rf[1][4] == 0 then
+-- 			rf[1][2] = rf[1][2] - 40
+-- 			rf[1][4] = nil
+-- 			if math.random(1,2) == 2 then
+-- 				rf[1][1] = rf[1][1] - 40
+-- 			else
+-- 				rf[1][1] = rf[1][1] + 40
+-- 			end
+-- 		end
+-- 		if rf[1][4] == 2 then
+-- 			rf[1][1] = rf[1][1] + 40
+-- 			rf[1][4] = nil
+-- 			if math.random(1,2) == 2 then
+-- 				rf[1][2] = rf[1][2] - 40
+-- 			else
+-- 				rf[1][2] = rf[1][2] + 40
+-- 			end
+-- 		end
+-- 		if rf[1][4] == 4 then
+-- 			rf[1][2] = rf[1][2] + 40
+-- 			rf[1][4] = nil
+-- 			if math.random(1,2) == 2 then
+-- 				rf[1][1] = rf[1][1] - 40
+-- 			else
+-- 				rf[1][1] = rf[1][1] + 40
+-- 			end
+-- 		end
+-- 		if rf[1][4] == 6 then
+-- 			rf[1][1] = rf[1][1] - 40
+-- 			rf[1][4] = nil
+-- 			if math.random(1,2) == 2 then
+-- 				rf[1][2] = rf[1][2] - 40
+-- 			else
+-- 				rf[1][2] = rf[1][2] + 40
+-- 			end
+-- 		end
+-- 		local mud = game.surfaces[1].find_tiles_filtered{name = {"water-mud"}, position = {rf[1][1], rf[1][2]}, radius = 16}
+-- 		local shallow = game.surfaces[1].find_tiles_filtered{name = {"water-shallow"}, position = {rf[1][1], rf[1][2]}, radius = 16}
+-- 		if next(mud) ~= nil or next(shallow) ~= nil then
+-- 			rf = nil
+-- 		end
+-- 		return rf
+-- 	end
+-- end
 -------------------------------------------------ID 2--------------------------------------------------------
 function t_location()
 	local next = next
@@ -482,24 +495,24 @@ local on_unit_group_finished_gathering = function(event)
 			local next = next
 			local selection = {}
 			local selected = {}
-			local f_location = f_location()
+			-- local f_location = f_location()
 			local t_location = t_location()
 			local pu_location = pu_location()
 			local r_location = r_location()
 			local s_location = s_location()
 			-- local pl_location = pl_location()
-			table.insert(selection, f_location)
+			-- table.insert(selection, f_location)
 			table.insert(selection, t_location)
 			table.insert(selection, pu_location)
 			table.insert(selection, r_location)
 			table.insert(selection, s_location)
 			if next(selection) ~= nil then
 				table.insert(selected, (selection[math.random(#selection)]))
-				if selected[1][1][3] == 1 then
+				-- if selected[1][1][3] == 1 then
 					--					game.print("EX F [gps=" .. selected[1][1][1] .. "," .. selected[1][1][2] .. "]")
-					local command = {type = defines.command.build_base,destination = {selected[1][1][1], selected[1][1][2]},distraction = defines.distraction.none,ignore_planner = true}
-					event.group.set_command(command)
-				end
+				-- 	local command = {type = defines.command.build_base,destination = {selected[1][1][1], selected[1][1][2]},distraction = defines.distraction.none,ignore_planner = true}
+				-- 	event.group.set_command(command)
+				-- end
 				if selected[1][1][3] == 2 then
 					--					game.print("EX T [gps=" .. selected[1][1][1] .. "," .. selected[1][1][2] .. "]")
 					local command = {type = defines.command.compound,structure_type = defines.compound_command.return_last,commands ={{type = defines.command.go_to_location,destination = {selected[1][1][1], selected[1][1][2]}},{type = defines.command.attack_area,destination = {selected[1][1][1], selected[1][1][2]},radius = 16,distraction = defines.distraction.by_anything},{type = defines.command.build_base,destination = {selected[1][1][1], selected[1][1][2]},distraction = defines.distraction.by_anything,ignore_planner = true}}}
@@ -545,24 +558,24 @@ local on_unit_group_finished_gathering = function(event)
 			local next = next
 			local selection = {}
 			local selected = {}
-			local f_location = f_location()
+			-- local f_location = f_location()
 			local t_location = t_location()
 			local pu_location = pu_location()
 			local r_location = r_location()
 			local s_location = s_location()
 			-- local pl_location = pl_location()
-			table.insert(selection, f_location)
+			-- table.insert(selection, f_location)
 			table.insert(selection, t_location)
 			table.insert(selection, pu_location)
 			table.insert(selection, r_location)
 			table.insert(selection, s_location)
 			if next(selection) ~= nil then
 				table.insert(selected, (selection[math.random(#selection)]))
-				if selected[1][1][3] == 1 then
+				-- if selected[1][1][3] == 1 then
 					--					game.print("PO F [gps=" .. selected[1][1][1] .. "," .. selected[1][1][2] .. "]")
-					local command = {type = defines.command.build_base,destination = {selected[1][1][1], selected[1][1][2]},distraction = defines.distraction.none,ignore_planner = true}
-					event.group.set_command(command)
-				end
+				-- 	local command = {type = defines.command.build_base,destination = {selected[1][1][1], selected[1][1][2]},distraction = defines.distraction.none,ignore_planner = true}
+				-- 	event.group.set_command(command)
+				-- end
 				if selected[1][1][3] == 2 then
 					--					game.print("PO T [gps=" .. selected[1][1][1] .. "," .. selected[1][1][2] .. "]")
 					local command = {type = defines.command.compound,structure_type = defines.compound_command.return_last,commands ={{type = defines.command.go_to_location,destination = {selected[1][1][1], selected[1][1][2]}},{type = defines.command.attack_area,destination = {selected[1][1][1], selected[1][1][2]},radius = 16,distraction = defines.distraction.by_anything},{type = defines.command.build_base,destination = {selected[1][1][1], selected[1][1][2]},distraction = defines.distraction.by_anything,ignore_planner = true}}}
@@ -708,12 +721,13 @@ function(event)
 	if (event.created_entity.name == "nuclear-reactor") then
 		global.r[event.created_entity.unit_number] = event.created_entity
 	end
-	if (event.created_entity.name == "flamethrower-turret") then
-		global.f[event.created_entity.unit_number] = event.created_entity
-	end
+	-- if (event.created_entity.name == "flamethrower-turret") then
+	-- 	global.f[event.created_entity.unit_number] = event.created_entity
+	-- end
 end
 )
-script.set_event_filter( defines.events.on_built_entity, {{filter = "name", name = "pumpjack"}, {filter = "name", name = "nuclear-reactor"}, {filter = "name", name = "flamethrower-turret"}})
+-- script.set_event_filter( defines.events.on_built_entity, {{filter = "name", name = "pumpjack"}, {filter = "name", name = "nuclear-reactor"}, {filter = "name", name = "flamethrower-turret"}})
+script.set_event_filter( defines.events.on_built_entity, {{filter = "name", name = "pumpjack"}, {filter = "name", name = "nuclear-reactor"}})
 ------------------------------------------------------------------------------------------------------------------------------------------------
 script.on_event(defines.events.on_robot_built_entity,
 function(event)
@@ -723,12 +737,13 @@ function(event)
 	if (event.created_entity.name == "nuclear-reactor") then
 		global.r[event.created_entity.unit_number] = event.created_entity
 	end
-	if (event.created_entity.name == "flamethrower-turret") then
-		global.f[event.created_entity.unit_number] = event.created_entity
-	end
+	-- if (event.created_entity.name == "flamethrower-turret") then
+	-- 	global.f[event.created_entity.unit_number] = event.created_entity
+	-- end
 end
 )
-script.set_event_filter( defines.events.on_robot_built_entity, {{filter = "name", name = "pumpjack"}, {filter = "name", name = "nuclear-reactor"}, {filter = "name", name = "flamethrower-turret"}})
+-- script.set_event_filter( defines.events.on_robot_built_entity, {{filter = "name", name = "pumpjack"}, {filter = "name", name = "nuclear-reactor"}, {filter = "name", name = "flamethrower-turret"}})
+script.set_event_filter( defines.events.on_robot_built_entity, {{filter = "name", name = "pumpjack"}, {filter = "name", name = "nuclear-reactor"}})
 -------------------------------------------------------------------------------------------------------------------------
 function convert_shallow_water_in_area(target_area)
 	local surface = game.surfaces[1]
