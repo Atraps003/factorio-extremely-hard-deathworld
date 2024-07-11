@@ -429,7 +429,8 @@ function reset(reason)
 		local victory = global.extremely_hard_victory
 		local red = game.forces["player"].item_production_statistics.get_output_count "automation-science-pack"
 		local deaths = game.forces["player"].kill_count_statistics.get_output_count "character"
-		game.write_file("reset/reset.log", {"",victory,"_",red,"_",deaths}, false, 0)
+		local minutes = math.floor((game.ticks_played / 3600) * 10) / 10
+		game.write_file("reset/reset.log", {"",victory,"_",red,"_",deaths,"_",minutes}, false, 0)
 		change_seed()
 
 		game.surfaces[1].clear(true)
