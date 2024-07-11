@@ -3,6 +3,12 @@ local crash_site = require("crash-site")
 
 local SHALLOW_WATER_CONVERSION_DELAY = 60
 
+----We disable victory conditions of silo script because it doesn't work with soft reset
+global.no_victory = true
+----
+
+global.extremely_hard_victory = false
+
 global.restart = "false"
 global.converted_shallow_water = false
 
@@ -154,6 +160,7 @@ local reset_global_settings__post_surface_clear = function()
 	game.pollution_statistics.clear()
 
 	-- clear globals
+	global.extremely_hard_victory = false
 	global.latch = 0
 	global.w = "small-worm-turret"
 	global.e = "grenade"
@@ -419,7 +426,7 @@ function reset(reason)
 		game.write_file("reset/reset.log", "restart", false, 0)
 	else
 		reset_type = "[color=green][font=default-large-bold]Soft reset[/font][/color]"
-		local victory = game.finished_but_continuing
+		local victory = global.extremely_hard_victory
 		local red = game.forces["player"].item_production_statistics.get_output_count "automation-science-pack"
 		local deaths = game.forces["player"].kill_count_statistics.get_output_count "character"
 		game.write_file("reset/reset.log", {"",victory,"_",red,"_",deaths}, false, 0)
@@ -789,8 +796,12 @@ local on_biter_base_built = function(event)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------------
 local on_rocket_launched = function(event)
-	global.e = "explosive-rocket"
-	global.n = 10
+	if global.extremely_hard_victory == false then
+		global.n = 10
+		global.e = "explosive-rocket"
+		global.extremely_hard_victory = true
+		game.set_game_state{game_finished = true, player_won = true, can_continue = true, victorious_force = player}
+	end
 end
 ------------------------------------------------------------------------------------------------------------------------------------------------
 --local on_player_died = function(event)
