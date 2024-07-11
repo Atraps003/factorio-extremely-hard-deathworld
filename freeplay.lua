@@ -645,6 +645,7 @@ script.on_nth_tick(36000, function()
 	local pollution = game.pollution_statistics.get_flow_count{name="biter-spawner",output=true,precision_index=defines.flow_precision_index.ten_minutes}
 	local iron = game.forces["player"].item_production_statistics.get_flow_count{name="iron-ore",input=true,precision_index=defines.flow_precision_index.one_hour}
 	local tpd = ((evo + 1) * 25000)
+	local engine = game.forces["player"].technologies["engine"].researched
 	game.surfaces[1].ticks_per_day = tpd
 	---------------------------------------------------------------------------------------------------------------------------------
 	-- local hours = math.floor((game.ticks_played / 216000) * 100) / 100
@@ -667,11 +668,11 @@ script.on_nth_tick(36000, function()
 		global.behemoth_biter_hp = (math.min((global.behemoth_biter_hp + 1), 99))
 	end
 	-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-	if (evo > 0.3 and kills < 250 and pollution > 1) then
+	if (engine == true and kills < 250 and pollution > 1) then
 		game.map_settings.pollution.enemy_attack_pollution_consumption_modifier = (math.max((game.map_settings.pollution.enemy_attack_pollution_consumption_modifier * 0.5), 0.01))
 	end
-	if (evo > 0.3 and kills > 290 and pollution > 1) then
-		game.map_settings.pollution.enemy_attack_pollution_consumption_modifier = (math.min((game.map_settings.pollution.enemy_attack_pollution_consumption_modifier * 1.2), 0.5))
+	if (engine == true and kills > 290 and pollution > 1) then
+		game.map_settings.pollution.enemy_attack_pollution_consumption_modifier = (math.min((game.map_settings.pollution.enemy_attack_pollution_consumption_modifier * 1.2), 1.5))
 	end
 	-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 	if (evo > 0.3 and iron > 60 and pollution < 5) then
