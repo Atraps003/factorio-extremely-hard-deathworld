@@ -982,8 +982,6 @@ local on_research_finished = function(event)
 		game.forces["player"].worker_robots_speed_modifier = 20
 		game.forces["player"].worker_robots_battery_modifier = 10
 		game.forces["player"].worker_robots_storage_bonus = 100
-		game.forces["player"].inserter_stack_size_bonus = 90
-		game.forces["player"].stack_inserter_capacity_bonus = 100
 		game.difficulty_settings.recipe_difficulty = 0
 	end
 	--------------------------------------------------------------------------------------------
