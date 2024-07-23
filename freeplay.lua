@@ -643,7 +643,7 @@ end)
 
 script.on_nth_tick(36000, function()
 	local evo = game.forces["enemy"].evolution_factor
-	local kills = game.forces["player"].kill_count_statistics.get_flow_count{name="medium-biter",input=true,precision_index=defines.flow_precision_index.ten_minutes} + game.forces["player"].kill_count_statistics.get_flow_count{name="big-biter",input=true,precision_index=defines.flow_precision_index.ten_minutes} + game.forces["player"].kill_count_statistics.get_flow_count{name="behemoth-biter",input=true,precision_index=defines.flow_precision_index.ten_minutes} + (game.forces["player"].kill_count_statistics.get_flow_count{name="small-biter",input=true,precision_index=defines.flow_precision_index.ten_minutes} * 0.5)
+	local kills = game.forces["player"].kill_count_statistics.get_flow_count{name="medium-biter",input=true,precision_index=defines.flow_precision_index.ten_minutes} + game.forces["player"].kill_count_statistics.get_flow_count{name="big-biter",input=true,precision_index=defines.flow_precision_index.ten_minutes} + game.forces["player"].kill_count_statistics.get_flow_count{name="behemoth-biter",input=true,precision_index=defines.flow_precision_index.ten_minutes} + (game.forces["player"].kill_count_statistics.get_flow_count{name="small-biter",input=true,precision_index=defines.flow_precision_index.ten_minutes} * 0.4)
 	local pollution = game.pollution_statistics.get_flow_count{name="biter-spawner",output=true,precision_index=defines.flow_precision_index.ten_minutes}
 	local iron = game.forces["player"].item_production_statistics.get_flow_count{name="iron-ore",input=true,precision_index=defines.flow_precision_index.one_hour}
 	local tpd = ((evo + 1) * 25000)
@@ -711,7 +711,7 @@ function(event)
 	end
 end
 )
-script.set_event_filter(defines.events.on_entity_damaged, {{filter = "type", type = "unit"}, {filter = "final-health", comparison = "=", value = 0, mode = "and"}})
+script.set_event_filter(defines.events.on_entity_damaged, {{filter = "name", name = "medium-biter"},{filter = "name", name = "big-biter"},{filter = "name", name = "behemoth-biter"},{filter = "name", name = "small-spitter"},{filter = "name", name = "medium-spitter"},{filter = "name", name = "big-spitter"},{filter = "name", name = "behemoth-spitter"},{filter = "final-health", comparison = "=", value = 0, mode = "and"}})
 ----------------------------------------------------------------------------------------------------------------------------------
 script.on_event(defines.events.on_built_entity,
 function(event)
