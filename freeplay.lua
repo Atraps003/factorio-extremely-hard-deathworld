@@ -14,14 +14,15 @@ global.converted_shallow_water = false
 
 global.latch = 0
 global.w = "small-worm-turret"
-global.e = "grenade"
 global.n = 6
 -- global.f = {}
 global.t = {}
 global.pu = {}
 global.r = {}
 global.s = {}
-global.behemoth_biter_hp = 50
+global.biter_hp = 2
+global.kills_min = 150
+global.kills_max = 200
 
 --[[
 	key: player_idnex
@@ -163,7 +164,6 @@ local reset_global_settings__post_surface_clear = function()
 	global.extremely_hard_victory = false
 	global.latch = 0
 	global.w = "small-worm-turret"
-	global.e = "grenade"
 	global.n = 6
 	-- global.f = {}
 	global.t = {}
@@ -171,7 +171,9 @@ local reset_global_settings__post_surface_clear = function()
 	global.r = {}
 	global.s = {}
 	global.player_state = {}
-	global.behemoth_biter_hp = 50
+	global.biter_hp = 2
+	global.kills_min = 150
+	global.kills_max = 200
 	-- [converted_shallow_water] is reset during [pre_surface_clear] above
 
 	-- default starting map settings
@@ -188,9 +190,9 @@ local reset_global_settings__post_surface_clear = function()
 	game.map_settings.path_finder.ignore_moving_enemy_collision_distance = 0
 	game.map_settings.max_failed_behavior_count = 1
 	game.map_settings.pollution.ageing = 0.5
-	game.map_settings.pollution.enemy_attack_pollution_consumption_modifier = 0.5
+	game.map_settings.pollution.enemy_attack_pollution_consumption_modifier = 3
 	game.map_settings.unit_group.max_gathering_unit_groups = 30
-	game.map_settings.unit_group.max_unit_group_size = 300
+	game.map_settings.unit_group.max_unit_group_size = 150
 
 	local surface = game.surfaces[1]
 	if math.random(1,2) == 2 then
@@ -215,12 +217,12 @@ local reset_global_settings__post_surface_clear = function()
 		surface.freeze_daytime = false
 	end
 
-	game.forces["enemy"].friendly_fire = false
 	game.forces["player"].research_queue_enabled = true
 	game.forces["player"].max_failed_attempts_per_tick_per_construction_queue = 2
 	game.forces["player"].max_successful_attempts_per_tick_per_construction_queue = 6
 	game.difficulty_settings.technology_price_multiplier = 1
 	game.difficulty_settings.recipe_difficulty = 0
+	surface.solar_power_multiplier = 1
 
 --  game.map_settings.enemy_expansion.max_expansion_distance = 1
 --  game.map_settings.enemy_expansion.friendly_base_influence_radius = 0
@@ -645,7 +647,6 @@ script.on_nth_tick(36000, function()
 	local pollution = game.pollution_statistics.get_flow_count{name="biter-spawner",output=true,precision_index=defines.flow_precision_index.ten_minutes}
 	local iron = game.forces["player"].item_production_statistics.get_flow_count{name="iron-ore",input=true,precision_index=defines.flow_precision_index.one_hour}
 	local tpd = ((evo + 1) * 25000)
-	local engine = game.forces["player"].technologies["engine"].researched
 	game.surfaces[1].ticks_per_day = tpd
 	---------------------------------------------------------------------------------------------------------------------------------
 	-- local hours = math.floor((game.ticks_played / 216000) * 100) / 100
@@ -654,35 +655,35 @@ script.on_nth_tick(36000, function()
 	---------------------------------------------------------------------------------------------------------------------------------
 	if (evo > 0.3 and evo < 0.5) then
 		game.map_settings.enemy_evolution.time_factor = 0.00014
+		global.w = "medium-worm-turret"
 	end
 	if (evo > 0.5 and evo < 0.7) then
 		game.map_settings.enemy_evolution.time_factor = 0.0004
-		global.w = "medium-worm-turret"
+		global.w = "big-worm-turret"
 	end
 	if (evo > 0.7 and evo < 0.9) then
 		game.map_settings.enemy_evolution.time_factor = 0.004
-		global.w = "big-worm-turret"
 	end
 	if (evo > 0.9) then
 		global.w = "behemoth-worm-turret"
-		global.behemoth_biter_hp = (math.min((global.behemoth_biter_hp + 1), 99))
+		global.biter_hp = global.biter_hp + 1
 	end
 	-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-	if (engine == true and kills < 250 and pollution > 1) then
+	if (kills < global.kills_min and pollution > 1) then
 		game.map_settings.pollution.enemy_attack_pollution_consumption_modifier = (math.max((game.map_settings.pollution.enemy_attack_pollution_consumption_modifier * 0.5), 0.01))
 	end
-	if (engine == true and kills > 290 and pollution > 1) then
-		game.map_settings.pollution.enemy_attack_pollution_consumption_modifier = (math.min((game.map_settings.pollution.enemy_attack_pollution_consumption_modifier * 1.2), 1.5))
+	if (kills > global.kills_max and pollution > 1) then
+		game.map_settings.pollution.enemy_attack_pollution_consumption_modifier = (math.min((game.map_settings.pollution.enemy_attack_pollution_consumption_modifier * 1.5), 4.5))
 	end
 	-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 	if (evo > 0.3 and iron > 60 and pollution < 5) then
 		game.map_settings.pollution.ageing = (game.map_settings.pollution.ageing * 0.8)
 	end
 	------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-	-- if (evo > 0.1) then
-	-- 	game.map_settings.enemy_expansion.settler_group_min_size = 90
-	-- 	game.map_settings.enemy_expansion.settler_group_max_size  = 100
-	-- end
+	 if (evo > 0.1) then
+	 	game.map_settings.enemy_expansion.settler_group_min_size = 30
+	 	game.map_settings.enemy_expansion.settler_group_max_size  = 40
+	 end
 	---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 	if game.ticks_played > 36288000 then
 		reset("Game has reached its maximum playtime of 7 days.")
@@ -701,26 +702,16 @@ end
 )
 script.set_event_filter(defines.events.on_post_entity_died, {{filter = "type", type = "fluid-turret"}, {filter = "type", type = "ammo-turret"}, {filter = "type", type = "unit-spawner"}})
 ----------------------------------------------------------------------------------------------------------------------------------
-script.on_event(defines.events.on_entity_died,
-function(event)
-	if math.random(1,4) == 2 then
-		local create_entity = game.surfaces[1].create_entity
-		local entity_position = event.entity.position
-		create_entity{name = global.e, target = entity_position, speed = 1, position = entity_position, force = "enemy"}
-		create_entity{name = global.w, position = entity_position}
-	end
-end
-)
-script.set_event_filter(defines.events.on_entity_died, {{filter = "name", name = "behemoth-spitter"}, {filter = "name", name = "big-spitter"}, {filter = "name", name = "medium-spitter"}, {filter = "name", name = "small-spitter"}})
+
 ----------------------------------------------------------------------------------------------------------------------------------
 script.on_event(defines.events.on_entity_damaged,
 function(event)
-	if math.random(1, 100) <= global.behemoth_biter_hp then
+	if math.random(1, global.biter_hp) ~= global.biter_hp then
 		event.entity.health = 3000
 	end
 end
 )
-script.set_event_filter(defines.events.on_entity_damaged, {{filter = "name", name = "behemoth-biter"}, {filter = "final-health", comparison = "=", value = 0, mode = "and"}})
+script.set_event_filter(defines.events.on_entity_damaged, {{filter = "type", type = "unit"}, {filter = "final-health", comparison = "=", value = 0, mode = "and"}})
 ----------------------------------------------------------------------------------------------------------------------------------
 script.on_event(defines.events.on_built_entity,
 function(event)
@@ -799,8 +790,9 @@ end
 ---------------------------------------------------------------------------------------------------------------------------------------------------
 local on_rocket_launched = function(event)
 	if global.extremely_hard_victory == false then
-		global.n = 10
-		global.e = "explosive-rocket"
+		global.kills_min = 100
+		global.kills_max = 150
+		game.map_settings.unit_group.max_unit_group_size = 100
 		global.extremely_hard_victory = true
 		game.set_game_state{game_finished = true, player_won = true, can_continue = true, victorious_force = player}
 	end
@@ -818,6 +810,8 @@ end
 -------------------------------------------------------------------------------------------------------------------------------------------
 local on_research_finished = function(event)
 	game.difficulty_settings.technology_price_multiplier = 1
+	game.surfaces[1].solar_power_multiplier = (game.forces["player"].mining_drill_productivity_bonus + 1)
+	global.biter_hp = global.biter_hp + 1
 	
 	-----------------------------------------------------------------------------------------------------------
 	-- local tpd = (((game.forces["player"].mining_drill_productivity_bonus * 10) + 1) * 25000)
@@ -846,10 +840,8 @@ local on_research_finished = function(event)
 	--  game.forces["enemy"].set_ammo_damage_modifier("biological", 3)
 	--  end
 	------------------------------------------------------------------------------------------------------------------------------------------------------
-	if (event.research.name == "logistic-science-pack") then
-		game.map_settings.enemy_expansion.settler_group_min_size = 90
-		game.map_settings.enemy_expansion.settler_group_max_size  = 100
-	end
+	-- if (event.research.name == "logistic-science-pack") then
+	-- end
 	--  if (event.research.name == "utility-science-pack") then
 	--  game.map_settings.enemy_evolution.time_factor = 0.00006
 	--  game.map_settings.enemy_evolution.pollution_factor = 0.0000013
@@ -860,22 +852,22 @@ local on_research_finished = function(event)
 	--  end
 	-----------------------------------------------------------------------------------------------------------------------------------------------------------
 	if (event.research.name == "laser-shooting-speed-1") then
-		game.forces["player"].set_gun_speed_modifier("laser", 0.8)
+		game.forces["player"].set_gun_speed_modifier("laser", 2)
 	end
 	if (event.research.name == "laser-shooting-speed-2") then
-		game.forces["player"].set_gun_speed_modifier("laser", 1.6)
+		game.forces["player"].set_gun_speed_modifier("laser", 3)
 	end
 	if (event.research.name == "laser-shooting-speed-3") then
-		game.forces["player"].set_gun_speed_modifier("laser", 2.4)
-	end
-	if (event.research.name == "laser-shooting-speed-4") then
-		game.forces["player"].set_gun_speed_modifier("laser", 3.2)
-	end
-	if (event.research.name == "laser-shooting-speed-5") then
 		game.forces["player"].set_gun_speed_modifier("laser", 4)
 	end
+	if (event.research.name == "laser-shooting-speed-4") then
+		game.forces["player"].set_gun_speed_modifier("laser", 5)
+	end
+	if (event.research.name == "laser-shooting-speed-5") then
+		game.forces["player"].set_gun_speed_modifier("laser", 5.2)
+	end
 	if (event.research.name == "laser-shooting-speed-6") then
-		game.forces["player"].set_gun_speed_modifier("laser", 4.8)
+		game.forces["player"].set_gun_speed_modifier("laser", 5.4)
 	end
 	if (event.research.name == "laser-shooting-speed-7") then
 		game.forces["player"].set_gun_speed_modifier("laser", 5.6)
@@ -883,6 +875,7 @@ local on_research_finished = function(event)
 	--------------------------------------------------------------------------------------------------------------------------------------------------------------
 	if (event.research.name == "laser") then
 		game.forces["player"].set_turret_attack_modifier("laser-turret", 1.35)
+		game.forces["player"].set_gun_speed_modifier("laser", 1)
 	end
 	--------------------------------------------------------------------------------------------------------------------------------------------------------------
 	--  if (event.research.name == "energy-weapons-damage-1") then
