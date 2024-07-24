@@ -711,7 +711,7 @@ function(event)
 	end
 end
 )
-script.set_event_filter(defines.events.on_entity_damaged, {{filter = "name", name = "medium-biter"},{filter = "name", name = "big-biter"},{filter = "name", name = "behemoth-biter"},{filter = "name", name = "small-spitter"},{filter = "name", name = "medium-spitter"},{filter = "name", name = "big-spitter"},{filter = "name", name = "behemoth-spitter"},{filter = "final-health", comparison = "=", value = 0, mode = "and"}})
+script.set_event_filter(defines.events.on_entity_damaged, {{filter = "name", name = "medium-biter"},{filter = "final-health", comparison = "=", value = 0, mode = "and"},{filter = "name", name = "big-biter"},{filter = "final-health", comparison = "=", value = 0, mode = "and"},{filter = "name", name = "behemoth-biter"},{filter = "final-health", comparison = "=", value = 0, mode = "and"},{filter = "name", name = "small-spitter"},{filter = "final-health", comparison = "=", value = 0, mode = "and"},{filter = "name", name = "medium-spitter"},{filter = "final-health", comparison = "=", value = 0, mode = "and"},{filter = "name", name = "big-spitter"},{filter = "final-health", comparison = "=", value = 0, mode = "and"},{filter = "name", name = "behemoth-spitter"},{filter = "final-health", comparison = "=", value = 0, mode = "and"}})
 ----------------------------------------------------------------------------------------------------------------------------------
 script.on_event(defines.events.on_built_entity,
 function(event)
