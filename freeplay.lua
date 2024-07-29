@@ -653,6 +653,14 @@ script.on_nth_tick(36000, function()
 	-- local rounded_evo = math.floor(evo * 100) / 100
 	-- game.write_file("evo", {"",rounded_evo," evo in ",hours," hours\n"}, true, 1)
 	---------------------------------------------------------------------------------------------------------------------------------
+	local red_sci = game.forces["player"].item_production_statistics.get_output_count "automation-science-pack" * 3
+	local green_sci = game.forces["player"].item_production_statistics.get_output_count "logistic-science-pack" * 7
+	local blue_sci = game.forces["player"].item_production_statistics.get_output_count "chemical-science-pack" * 60
+	local purple_sci = game.forces["player"].item_production_statistics.get_output_count "production-science-pack" * 155
+	local yellow_sci = game.forces["player"].item_production_statistics.get_output_count "utility-science-pack" * 195
+	local adjusted_sci = math.ceil(math.min((((red_sci + green_sci + blue_sci + purple_sci + yellow_sci) * 0.0001) + 1.5), 77))
+	global.biter_hp = math.max(adjusted_sci + math.ceil(math.max(((game.ticks_played - 1296000) * 0.00002777), 0)), 2)
+	---------------------------------------------------------------------------------------------------------------------------------
 	if (evo > 0.3 and evo < 0.5) then
 		game.map_settings.enemy_evolution.time_factor = 0.00014
 		global.w = "medium-worm-turret"
@@ -666,7 +674,6 @@ script.on_nth_tick(36000, function()
 	end
 	if (evo > 0.9) then
 		global.w = "behemoth-worm-turret"
-		global.biter_hp = global.biter_hp + 1
 	end
 	-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 	if (kills < global.kills_min and pollution > 1) then
@@ -711,7 +718,7 @@ function(event)
 	end
 end
 )
-script.set_event_filter(defines.events.on_entity_damaged, {{filter = "name", name = "medium-biter"},{filter = "final-health", comparison = "=", value = 0, mode = "and"},{filter = "name", name = "big-biter"},{filter = "final-health", comparison = "=", value = 0, mode = "and"},{filter = "name", name = "behemoth-biter"},{filter = "final-health", comparison = "=", value = 0, mode = "and"},{filter = "name", name = "small-spitter"},{filter = "final-health", comparison = "=", value = 0, mode = "and"},{filter = "name", name = "medium-spitter"},{filter = "final-health", comparison = "=", value = 0, mode = "and"},{filter = "name", name = "big-spitter"},{filter = "final-health", comparison = "=", value = 0, mode = "and"},{filter = "name", name = "behemoth-spitter"},{filter = "final-health", comparison = "=", value = 0, mode = "and"}})
+script.set_event_filter(defines.events.on_entity_damaged, {{filter = "type", type = "unit"}, {filter = "final-health", comparison = "=", value = 0, mode = "and"}})
 ----------------------------------------------------------------------------------------------------------------------------------
 script.on_event(defines.events.on_built_entity,
 function(event)
@@ -811,7 +818,6 @@ end
 local on_research_finished = function(event)
 	game.difficulty_settings.technology_price_multiplier = 1
 	game.surfaces[1].solar_power_multiplier = (game.forces["player"].mining_drill_productivity_bonus + 1)
-	global.biter_hp = global.biter_hp + 1
 	
 	-----------------------------------------------------------------------------------------------------------
 	-- local tpd = (((game.forces["player"].mining_drill_productivity_bonus * 10) + 1) * 25000)
@@ -852,22 +858,22 @@ local on_research_finished = function(event)
 	--  end
 	-----------------------------------------------------------------------------------------------------------------------------------------------------------
 	if (event.research.name == "laser-shooting-speed-1") then
-		game.forces["player"].set_gun_speed_modifier("laser", 2)
-	end
-	if (event.research.name == "laser-shooting-speed-2") then
-		game.forces["player"].set_gun_speed_modifier("laser", 3)
-	end
-	if (event.research.name == "laser-shooting-speed-3") then
-		game.forces["player"].set_gun_speed_modifier("laser", 4)
-	end
-	if (event.research.name == "laser-shooting-speed-4") then
 		game.forces["player"].set_gun_speed_modifier("laser", 5)
 	end
-	if (event.research.name == "laser-shooting-speed-5") then
+	if (event.research.name == "laser-shooting-speed-2") then
+		game.forces["player"].set_gun_speed_modifier("laser", 5.1)
+	end
+	if (event.research.name == "laser-shooting-speed-3") then
 		game.forces["player"].set_gun_speed_modifier("laser", 5.2)
 	end
-	if (event.research.name == "laser-shooting-speed-6") then
+	if (event.research.name == "laser-shooting-speed-4") then
+		game.forces["player"].set_gun_speed_modifier("laser", 5.3)
+	end
+	if (event.research.name == "laser-shooting-speed-5") then
 		game.forces["player"].set_gun_speed_modifier("laser", 5.4)
+	end
+	if (event.research.name == "laser-shooting-speed-6") then
+		game.forces["player"].set_gun_speed_modifier("laser", 5.5)
 	end
 	if (event.research.name == "laser-shooting-speed-7") then
 		game.forces["player"].set_gun_speed_modifier("laser", 5.6)
@@ -875,7 +881,7 @@ local on_research_finished = function(event)
 	--------------------------------------------------------------------------------------------------------------------------------------------------------------
 	if (event.research.name == "laser") then
 		game.forces["player"].set_turret_attack_modifier("laser-turret", 1.35)
-		game.forces["player"].set_gun_speed_modifier("laser", 1)
+		game.forces["player"].set_gun_speed_modifier("laser", 4)
 	end
 	--------------------------------------------------------------------------------------------------------------------------------------------------------------
 	--  if (event.research.name == "energy-weapons-damage-1") then
