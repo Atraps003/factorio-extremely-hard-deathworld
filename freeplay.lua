@@ -423,23 +423,22 @@ end
 ------------------------------------------------------------------------------------------------
 function reset(reason)
 	local reset_type = nil
+	local red = game.forces["player"].item_production_statistics.get_output_count "automation-science-pack"
 	if (global.restart == "true") then
 		reset_type = "[color=red][font=default-large-bold]Hard reset[/font][/color]"
 		game.write_file("reset/reset.log", "restart", false, 0)
 	else
+		if (red > 0) then
+			local victory = global.extremely_hard_victory
+			local deaths = game.forces["player"].kill_count_statistics.get_output_count "character"
+			local minutes = math.floor((game.ticks_played / 3600) * 10) / 10
+			game.write_file("reset/reset.log", {"",victory,"_",red,"_",deaths,"_",minutes}, false, 0)
+		end
 		reset_type = "[color=green][font=default-large-bold]Soft reset[/font][/color]"
-		local victory = global.extremely_hard_victory
-		local red = game.forces["player"].item_production_statistics.get_output_count "automation-science-pack"
-		local deaths = game.forces["player"].kill_count_statistics.get_output_count "character"
-		local minutes = math.floor((game.ticks_played / 3600) * 10) / 10
-		game.write_file("reset/reset.log", {"",victory,"_",red,"_",deaths,"_",minutes}, false, 0)
 		change_seed()
-
 		game.surfaces[1].clear(true)
-
 		game.forces["player"].reset()
 	end
-
 	if reason ~= nil then
 		game.print(string.format("%s [color=yellow]%s[/color]", reset_type, reason))
 	end
