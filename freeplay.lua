@@ -558,7 +558,7 @@ local on_unit_group_finished_gathering = function(event)
 			if next(selected) == nil then
 				table.insert(selected, {{0, 0}})
 				--				game.print("EX SPAWN [gps=" .. selected[1][1][1] .. "," .. selected[1][1][2] .. "]")
-				local command = {type = defines.command.compound,structure_type = defines.compound_command.return_last,commands ={{type = defines.command.go_to_location,destination = {selected[1][1][1], selected[1][1][2]}},{type = defines.command.attack_area,destination = {selected[1][1][1], selected[1][1][2]},radius = 16,distraction = defines.distraction.by_anything},{type = defines.command.build_base,destination = {selected[1][1][1], selected[1][1][2]},distraction = defines.distraction.by_anything,ignore_planner = true}}}
+				local command = {type = defines.command.compound,structure_type = defines.compound_command.return_last,commands ={{type = defines.command.go_to_location,destination = {selected[1][1][1], selected[1][1][2]}},{type = defines.command.attack_area,destination = {selected[1][1][1], selected[1][1][2]},radius = 16,distraction = defines.distraction.by_anything},{type = defines.command.build_base,destination = {selected[1][1][1], selected[1][1][2]},distraction = defines.distraction.none,ignore_planner = true}}}
 				event.group.set_command(command)
 			end
 		end
@@ -621,7 +621,7 @@ local on_unit_group_finished_gathering = function(event)
 			if next(selected) == nil then
 				table.insert(selected, {{0, 0}})
 				--				game.print("PO SPAWN [gps=" .. selected[1][1][1] .. "," .. selected[1][1][2] .. "]")
-				local command = {type = defines.command.compound,structure_type = defines.compound_command.return_last,commands ={{type = defines.command.go_to_location,destination = {selected[1][1][1], selected[1][1][2]}},{type = defines.command.attack_area,destination = {selected[1][1][1], selected[1][1][2]},radius = 16,distraction = defines.distraction.by_anything},{type = defines.command.build_base,destination = {selected[1][1][1], selected[1][1][2]},distraction = defines.distraction.by_anything,ignore_planner = true}}}
+				local command = {type = defines.command.compound,structure_type = defines.compound_command.return_last,commands ={{type = defines.command.go_to_location,destination = {selected[1][1][1], selected[1][1][2]}},{type = defines.command.attack_area,destination = {selected[1][1][1], selected[1][1][2]},radius = 16,distraction = defines.distraction.by_anything},{type = defines.command.build_base,destination = {selected[1][1][1], selected[1][1][2]},distraction = defines.distraction.none,ignore_planner = true}}}
 				event.group.set_command(command)
 			end
 		end
