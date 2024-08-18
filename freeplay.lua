@@ -501,66 +501,8 @@ local on_unit_group_finished_gathering = function(event)
 			global.latch = 1
 		else
 			global.latch = 0
-			local next = next
-			local selection = {}
-			local selected = {}
-			-- local f_location = f_location()
-			local t_location = t_location()
-			local pu_location = pu_location()
-			local r_location = r_location()
-			local s_location = s_location()
-			-- local pl_location = pl_location()
-			-- table.insert(selection, f_location)
-			table.insert(selection, t_location)
-			table.insert(selection, pu_location)
-			table.insert(selection, r_location)
-			table.insert(selection, s_location)
-			if next(selection) ~= nil then
-				table.insert(selected, (selection[math.random(#selection)]))
-				-- if selected[1][1][3] == 1 then
-					--					game.print("EX F [gps=" .. selected[1][1][1] .. "," .. selected[1][1][2] .. "]")
-				-- 	local command = {type = defines.command.build_base,destination = {selected[1][1][1], selected[1][1][2]},distraction = defines.distraction.none,ignore_planner = true}
-				-- 	event.group.set_command(command)
-				-- end
-				if selected[1][1][3] == 2 then
-					--					game.print("EX T [gps=" .. selected[1][1][1] .. "," .. selected[1][1][2] .. "]")
-					local command = {type = defines.command.compound,structure_type = defines.compound_command.return_last,commands ={{type = defines.command.go_to_location,destination = {selected[1][1][1], selected[1][1][2]}},{type = defines.command.attack_area,destination = {selected[1][1][1], selected[1][1][2]},radius = 16,distraction = defines.distraction.by_anything},{type = defines.command.build_base,destination = {selected[1][1][1], selected[1][1][2]},distraction = defines.distraction.by_anything,ignore_planner = true}}}
-					event.group.set_command(command)
-					if math.random(1,3) == 2 then
-						global.t = {}
-					end
-				end
-				if selected[1][1][3] == 3 then
-					--					game.print("EX PU [gps=" .. selected[1][1][1] .. "," .. selected[1][1][2] .. "]")
-					local command = {type = defines.command.compound,structure_type = defines.compound_command.return_last,commands ={{type = defines.command.go_to_location,destination = {selected[1][1][1], selected[1][1][2]}},{type = defines.command.attack_area,destination = {selected[1][1][1], selected[1][1][2]},radius = 16,distraction = defines.distraction.by_anything},{type = defines.command.build_base,destination = {selected[1][1][1], selected[1][1][2]},distraction = defines.distraction.by_anything,ignore_planner = true}}}
-					event.group.set_command(command)
-				end
-				if selected[1][1][3] == 4 then
-					--					game.print("EX R [gps=" .. selected[1][1][1] .. "," .. selected[1][1][2] .. "]")
-					local command = {type = defines.command.compound,structure_type = defines.compound_command.return_last,commands ={{type = defines.command.go_to_location,destination = {selected[1][1][1], selected[1][1][2]}},{type = defines.command.attack_area,destination = {selected[1][1][1], selected[1][1][2]},radius = 16,distraction = defines.distraction.by_anything},{type = defines.command.build_base,destination = {selected[1][1][1], selected[1][1][2]},distraction = defines.distraction.by_anything,ignore_planner = true}}}
-					event.group.set_command(command)
-				end
-				if selected[1][1][3] == 6 then
-					--					game.print("EX S [gps=" .. selected[1][1][1] .. "," .. selected[1][1][2] .. "]")
-					local command = {type = defines.command.compound,structure_type = defines.compound_command.return_last,commands ={{type = defines.command.go_to_location,destination = {selected[1][1][1], selected[1][1][2]}},{type = defines.command.attack_area,destination = {selected[1][1][1], selected[1][1][2]},radius = 16,distraction = defines.distraction.by_anything},{type = defines.command.build_base,destination = {selected[1][1][1], selected[1][1][2]},distraction = defines.distraction.none,ignore_planner = true}}}
-					event.group.set_command(command)
-					if math.random(1,5) == 2 then
-						global.s = {}
-					end
-				end
-			end
-			-- if next(selected) == nil and next(pl_location) ~= nil then
-			-- 	table.insert(selected, pl_location)
-			--	--				game.print("EX PL [gps=" .. selected[1][1][1] .. "," .. selected[1][1][2] .. "]")
-			-- 	local command = {type = defines.command.compound,structure_type = defines.compound_command.return_last,commands ={{type = defines.command.go_to_location,destination = {selected[1][1][1], selected[1][1][2]}},{type = defines.command.attack_area,destination = {selected[1][1][1], selected[1][1][2]},radius = 16,distraction = defines.distraction.by_anything},{type = defines.command.build_base,destination = {selected[1][1][1], selected[1][1][2]},distraction = defines.distraction.by_anything,ignore_planner = true}}}
-			-- 	event.group.set_command(command)
-			-- end
-			if next(selected) == nil then
-				table.insert(selected, {{0, 0}})
-				--				game.print("EX SPAWN [gps=" .. selected[1][1][1] .. "," .. selected[1][1][2] .. "]")
-				local command = {type = defines.command.compound,structure_type = defines.compound_command.return_last,commands ={{type = defines.command.go_to_location,destination = {selected[1][1][1], selected[1][1][2]}},{type = defines.command.attack_area,destination = {selected[1][1][1], selected[1][1][2]},radius = 16,distraction = defines.distraction.by_anything},{type = defines.command.build_base,destination = {selected[1][1][1], selected[1][1][2]},distraction = defines.distraction.none,ignore_planner = true}}}
-				event.group.set_command(command)
-			end
+			local command = {type = defines.command.compound,structure_type = defines.compound_command.return_last,commands ={{type = defines.command.go_to_location,destination = {0, 0}},{type = defines.command.attack_area,destination = {0, 0},radius = 16,distraction = defines.distraction.by_anything},{type = defines.command.build_base,destination = {0, 0},distraction = defines.distraction.none,ignore_planner = true}}}
+			event.group.set_command(command)
 		end
 	else
 		if math.random(1,2) == 2 then
