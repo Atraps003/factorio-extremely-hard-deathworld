@@ -37,7 +37,7 @@ global.kills_min = 250
 global.kills_max = 300
 
 global.player_state = {}
-global.first_respawn = true
+global.new_map = true
 
 local default_player_state = function ()
 	return {
@@ -108,8 +108,8 @@ local reset_global_setings__pre_surface_clear = function ()
 	-- convert water tiles immediately. We need to disable this flag before
 	-- reset, so that reset chunks are not touch until the surface clear is
 	-- fully complete.
-	-- global.converted_shallow_water = false
-	
+	global.new_map = true
+
 	-- We reset time played before clearing the surface. That way,
 	-- the periodic check that converts all water tiles does not fire until
 	-- after the surface map-generation is fully complete.
@@ -149,7 +149,6 @@ local reset_global_settings__post_surface_clear = function()
 	{0,0,0}
 	}
 	global.player_state = {}
-	global.first_respawn = true
 	global.biter_hp = 1
 	global.kills_min = 250
 	global.kills_max = 300
@@ -242,7 +241,6 @@ local on_player_created = function(event)
 		global.init_ran = true
 		
 		reset_global_settings()
-		game.forces.player.chart(game.surfaces[1], {{x = -200, y = -200}, {x = 200, y = 200}})
 
 		if not global.disable_crashsite then
 			local surface = player.surface
@@ -259,10 +257,6 @@ end
 
 local on_player_respawned = function(event)
 	handle_player_created_or_respawned(event.player_index)
-	if global.first_respawn == true then
-		global.first_respawn = false
-		game.forces.player.chart(game.surfaces[1], {{x = -200, y = -200}, {x = 200, y = 200}})
-	end
 end
 ------------------------------------------------------------------------------------------------
 function reset(reason)
@@ -440,6 +434,15 @@ local on_unit_group_finished_gathering = function(event)
 		end
 	end
 end
+-------------------------------------------------------------------------------------------------------
+script.on_nth_tick(120, function()
+	if global.new_map then
+		if game.ticks_played > 100 then
+			global.new_map = false
+			game.forces["player"].chart(game.surfaces[1], {{x = -200, y = -200}, {x = 200, y = 200}})
+		end
+	end
+end)
 -------------------------------------------------------------------------------------------------------
 script.on_nth_tick(18000, function()
 	local evo = game.forces["enemy"].evolution_factor
