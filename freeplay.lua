@@ -13,12 +13,28 @@ global.restart = "false"
 global.converted_shallow_water = false
 
 global.latch = 0
-global.w = "small-worm-turret"
-global.n = 6
-global.t = {}
-global.pu = {}
-global.r = {}
-global.s = {}
+global.u = {
+{0,0,0},
+{0,0,0},
+{0,0,0},
+{0,0,0},
+{0,0,0},
+{0,0,0},
+{0,0,0},
+{0,0,0},
+{0,0,0},
+{0,0,0},
+{0,0,0},
+{0,0,0},
+{0,0,0},
+{0,0,0},
+{0,0,0},
+{0,0,0},
+{0,0,0},
+{0,0,0},
+{0,0,0},
+{0,0,0}
+}
 global.biter_hp = 1
 global.kills_min = 250
 global.kills_max = 300
@@ -121,12 +137,28 @@ local reset_global_settings__post_surface_clear = function()
 	-- clear globals
 	global.extremely_hard_victory = false
 	global.latch = 0
-	global.w = "small-worm-turret"
-	global.n = 6
-	global.t = {}
-	global.pu = {}
-	global.r = {}
-	global.s = {}
+	global.u = {
+	{0,0,0},
+	{0,0,0},
+	{0,0,0},
+	{0,0,0},
+	{0,0,0},
+	{0,0,0},
+	{0,0,0},
+	{0,0,0},
+	{0,0,0},
+	{0,0,0},
+	{0,0,0},
+	{0,0,0},
+	{0,0,0},
+	{0,0,0},
+	{0,0,0},
+	{0,0,0},
+	{0,0,0},
+	{0,0,0},
+	{0,0,0},
+	{0,0,0}
+	}
 	global.player_state = {}
 	global.biter_hp = 1
 	global.kills_min = 250
@@ -238,58 +270,6 @@ end
 local on_player_respawned = function(event)
 	handle_player_created_or_respawned(event.player_index)
 end
--------------------------------------------------ID 2--------------------------------------------------------
-function t_location()
-	local next = next
-	local rt = {}
-	if next(global.t) ~= nil then
-		table.insert(rt, (global.t[math.random(#global.t)]))
-		return rt
-	end
-end
---------------------------------------------------------ID 3-------------------------------------------------------------------------------------
-function pu_location()
-	local next = next
-	local pupos = {}
-	local rpu = {}
-	for id, pu in pairs(global.pu) do
-		if pu.valid then
-			table.insert(pupos, {pu.position.x, pu.position.y, 3})
-		else
-			global.pu[id] = nil
-		end
-	end
-	if next(pupos) ~= nil then
-		table.insert(rpu, (pupos[math.random(#pupos)]))
-		return rpu
-	end
-end
----------------------------------------------------------------------ID 4------------------------------------------------------------------------
-function r_location()
-	local next = next
-	local rpos = {}
-	local rr = {}
-	for id, r in pairs(global.r) do
-		if r.valid then
-			table.insert(rpos, {r.position.x, r.position.y, 4})
-		else
-			global.r[id] = nil
-		end
-	end
-	if next(rpos) ~= nil then
-		table.insert(rr, (rpos[math.random(#rpos)]))
-		return rr
-	end
-end
--------------------------------------------------ID 6--------------------------------------------------------
-function s_location()
-	local next = next
-	local rs = {}
-	if next(global.s) ~= nil then
-		table.insert(rs, (global.s[math.random(#global.s)]))
-		return rs
-	end
-end
 ------------------------------------------------------------------------------------------------
 function reset(reason)
 	local reset_type = nil
@@ -370,52 +350,98 @@ local on_unit_group_finished_gathering = function(event)
 			global.latch = 1
 		else
 			global.latch = 0
-			local command = {type = defines.command.compound,structure_type = defines.compound_command.return_last,commands ={{type = defines.command.go_to_location,destination = {0, 0}},{type = defines.command.attack_area,destination = {0, 0},radius = 16,distraction = defines.distraction.by_anything},{type = defines.command.build_base,destination = {0, 0},distraction = defines.distraction.none,ignore_planner = true}}}
+			local command = {
+			type = defines.command.compound,structure_type = defines.compound_command.return_last,commands =
+			{
+			{type = defines.command.go_to_location,destination = {0, 0}},
+			{type = defines.command.attack_area,destination = {0, 0},radius = 16,distraction = defines.distraction.by_anything},
+			{type = defines.command.build_base,destination = {0, 0},distraction = defines.distraction.none,ignore_planner = true}
+			}
+			}
 			event.group.set_command(command)
 		end
 	else
-		if math.random(1,2) == 2 then
-			local next = next
-			local selection = {}
-			local selected = {}
-			local t_location = t_location()
-			local pu_location = pu_location()
-			local r_location = r_location()
-			local s_location = s_location()
-			table.insert(selection, t_location)
-			table.insert(selection, pu_location)
-			table.insert(selection, r_location)
-			table.insert(selection, s_location)
-			if next(selection) ~= nil then
-				table.insert(selected, (selection[math.random(#selection)]))
-				if selected[1][1][3] == 2 then
-					local command = {type = defines.command.compound,structure_type = defines.compound_command.return_last,commands ={{type = defines.command.go_to_location,destination = {selected[1][1][1], selected[1][1][2]}},{type = defines.command.attack_area,destination = {selected[1][1][1], selected[1][1][2]},radius = 16,distraction = defines.distraction.by_anything},{type = defines.command.build_base,destination = {selected[1][1][1], selected[1][1][2]},distraction = defines.distraction.by_anything,ignore_planner = true}}}
-					event.group.set_command(command)
-					if math.random(1,3) == 2 then
-						global.t = {}
-					end
-				end
-				if selected[1][1][3] == 3 then
-					local command = {type = defines.command.compound,structure_type = defines.compound_command.return_last,commands ={{type = defines.command.go_to_location,destination = {selected[1][1][1], selected[1][1][2]}},{type = defines.command.attack_area,destination = {selected[1][1][1], selected[1][1][2]},radius = 16,distraction = defines.distraction.by_anything},{type = defines.command.build_base,destination = {selected[1][1][1], selected[1][1][2]},distraction = defines.distraction.by_anything,ignore_planner = true}}}
-					event.group.set_command(command)
-				end
-				if selected[1][1][3] == 4 then
-					local command = {type = defines.command.compound,structure_type = defines.compound_command.return_last,commands ={{type = defines.command.go_to_location,destination = {selected[1][1][1], selected[1][1][2]}},{type = defines.command.attack_area,destination = {selected[1][1][1], selected[1][1][2]},radius = 16,distraction = defines.distraction.by_anything},{type = defines.command.build_base,destination = {selected[1][1][1], selected[1][1][2]},distraction = defines.distraction.by_anything,ignore_planner = true}}}
-					event.group.set_command(command)
-				end
-				if selected[1][1][3] == 6 then
-					local command = {type = defines.command.compound,structure_type = defines.compound_command.return_last,commands ={{type = defines.command.go_to_location,destination = {selected[1][1][1], selected[1][1][2]}},{type = defines.command.attack_area,destination = {selected[1][1][1], selected[1][1][2]},radius = 16,distraction = defines.distraction.by_anything},{type = defines.command.build_base,destination = {selected[1][1][1], selected[1][1][2]},distraction = defines.distraction.none,ignore_planner = true}}}
-					event.group.set_command(command)
-					if math.random(1,5) == 2 then
-						global.s = {}
-					end
-				end
-			end
-			if next(selected) == nil then
-				table.insert(selected, {{0, 0}})
-				local command = {type = defines.command.compound,structure_type = defines.compound_command.return_last,commands ={{type = defines.command.go_to_location,destination = {selected[1][1][1], selected[1][1][2]}},{type = defines.command.attack_area,destination = {selected[1][1][1], selected[1][1][2]},radius = 16,distraction = defines.distraction.by_anything},{type = defines.command.build_base,destination = {selected[1][1][1], selected[1][1][2]},distraction = defines.distraction.none,ignore_planner = true}}}
-				event.group.set_command(command)
-			end
+		if math.random(1,3) ~= 2 then
+			local command = {
+			type = defines.command.compound,structure_type = defines.compound_command.return_last,commands =
+			{
+			{type = defines.command.go_to_location,destination = {0, 0}},
+			{type = defines.command.attack_area,destination = {0, 0},radius = 16,distraction = defines.distraction.by_anything},
+			{type = defines.command.build_base,destination = {0, 0},distraction = defines.distraction.none,ignore_planner = true}
+			}
+			}
+			event.group.set_command(command)
+		else
+			local x = event.group.position.x
+			local y = event.group.position.y
+			local dx1 = x - global.u[1][1]
+			local dy1 = y - global.u[1][2]
+			local dx2 = x - global.u[2][1]
+			local dy2 = y - global.u[2][2]
+			local dx3 = x - global.u[3][1]
+			local dy3 = y - global.u[3][2]
+			local dx4 = x - global.u[4][1]
+			local dy4 = y - global.u[4][2]
+			local dx5 = x - global.u[5][1]
+			local dy5 = y - global.u[5][2]
+			local dx6 = x - global.u[6][1]
+			local dy6 = y - global.u[6][2]
+			local dx7 = x - global.u[7][1]
+			local dy7 = y - global.u[7][2]
+			local dx8 = x - global.u[8][1]
+			local dy8 = y - global.u[8][2]
+			local dx9 = x - global.u[9][1]
+			local dy9 = y - global.u[9][2]
+			local dx10 = x - global.u[10][1]
+			local dy10 = y - global.u[10][2]
+			local dx11 = x - global.u[11][1]
+			local dy11 = y - global.u[11][2]
+			local dx12 = x - global.u[12][1]
+			local dy12 = y - global.u[12][2]
+			local dx13 = x - global.u[13][1]
+			local dy13 = y - global.u[13][2]
+			local dx14 = x - global.u[14][1]
+			local dy14 = y - global.u[14][2]
+			local dx15 = x - global.u[15][1]
+			local dy15 = y - global.u[15][2]
+			local dx16 = x - global.u[16][1]
+			local dy16 = y - global.u[16][2]
+			local dx17 = x - global.u[17][1]
+			local dy17 = y - global.u[17][2]
+			local dx18 = x - global.u[18][1]
+			local dy18 = y - global.u[18][2]
+			local dx19 = x - global.u[19][1]
+			local dy19 = y - global.u[19][2]
+			local dx20 = x - global.u[20][1]
+			local dy20 = y - global.u[20][2]
+			global.u[1][3] = (math.sqrt(dx1 * dx1 + dy1 * dy1))
+			global.u[2][3] = (math.sqrt(dx2 * dx2 + dy2 * dy2))
+			global.u[3][3] = (math.sqrt(dx3 * dx3 + dy3 * dy3))
+			global.u[4][3] = (math.sqrt(dx4 * dx4 + dy4 * dy4))
+			global.u[5][3] = (math.sqrt(dx5 * dx5 + dy5 * dy5))
+			global.u[6][3] = (math.sqrt(dx6 * dx6 + dy6 * dy6))
+			global.u[7][3] = (math.sqrt(dx7 * dx7 + dy7 * dy7))
+			global.u[8][3] = (math.sqrt(dx8 * dx8 + dy8 * dy8))
+			global.u[9][3] = (math.sqrt(dx9 * dx9 + dy9 * dy9))
+			global.u[10][3] = (math.sqrt(dx10 * dx10 + dy10 * dy10))
+			global.u[11][3] = (math.sqrt(dx11 * dx11 + dy11 * dy11))
+			global.u[12][3] = (math.sqrt(dx12 * dx12 + dy12 * dy12))
+			global.u[13][3] = (math.sqrt(dx13 * dx13 + dy13 * dy13))
+			global.u[14][3] = (math.sqrt(dx14 * dx14 + dy14 * dy14))
+			global.u[15][3] = (math.sqrt(dx15 * dx15 + dy15 * dy15))
+			global.u[16][3] = (math.sqrt(dx16 * dx16 + dy16 * dy16))
+			global.u[17][3] = (math.sqrt(dx17 * dx17 + dy17 * dy17))
+			global.u[18][3] = (math.sqrt(dx18 * dx18 + dy18 * dy18))
+			global.u[19][3] = (math.sqrt(dx19 * dx19 + dy19 * dy19))
+			global.u[20][3] = (math.sqrt(dx20 * dx20 + dy20 * dy20))
+			table.sort(global.u, function(a,b) local aNum = a[3] local bNum = b[3] return aNum < bNum end)
+			local command = {
+			type = defines.command.compound,structure_type = defines.compound_command.return_last,commands =
+			{
+			{type = defines.command.build_base,destination = {global.u[1][1], global.u[1][2]},distraction = defines.distraction.none,ignore_planner = true}
+			}
+			}
+			event.group.set_command(command)
 		end
 	end
 end
@@ -445,15 +471,12 @@ script.on_nth_tick(18000, function()
 	---------------------------------------------------------------------------------------------------------------------------------
 	if (evo > 0.3 and evo < 0.5) then
 		game.map_settings.enemy_evolution.time_factor = 0.00056
-		global.w = "medium-worm-turret"
 	end
 	if (evo > 0.5 and evo < 0.7) then
 		game.map_settings.enemy_evolution.time_factor = 0.0008
-		global.w = "big-worm-turret"
 	end
 	if (evo > 0.7 and evo < 0.9) then
 		game.map_settings.enemy_evolution.time_factor = 0.004
-		global.w = "behemoth-worm-turret"
 	end
 	if (evo > 0.95) then
 		global.biter_hp = global.biter_hp + 1
@@ -475,24 +498,16 @@ script.on_nth_tick(18000, function()
 		reset("Game has reached its maximum playtime of 7 days.")
 	end
 end)
--------------------------------------------------------------------------------------------------------------------
-script.on_event(defines.events.on_post_entity_died,
-function(event)
-	if (event.prototype.type == "unit-spawner") then
-		table.insert(global.s, {event.position.x, event.position.y, 6})
-	else
-		table.insert(global.t, {event.position.x, event.position.y, 2})
-	end
-end
-)
-script.set_event_filter(defines.events.on_post_entity_died, {{filter = "type", type = "fluid-turret"}, {filter = "type", type = "ammo-turret"}, {filter = "type", type = "unit-spawner"}})
 ----------------------------------------------------------------------------------------------------------------------------------
 script.on_event(defines.events.on_entity_died,
 function(event)
 	if math.random(1,5) == 2 then
 		local create_entity = game.surfaces[1].create_entity
 		local entity_position = event.entity.position
+		local rand = math.random(1, 20)
 		create_entity{name = "grenade", target = entity_position, speed = 1, position = entity_position, force = "enemy"}
+		global.u[rand][1] = entity_position.x
+		global.u[rand][2] = entity_position.y
 	end
 end
 )
@@ -506,30 +521,6 @@ function(event)
 end
 )
 script.set_event_filter(defines.events.on_entity_damaged, {{filter = "name", name = "behemoth-biter"}, {filter = "final-health", comparison = "=", value = 0, mode = "and"}})
-----------------------------------------------------------------------------------------------------------------------------------
-script.on_event(defines.events.on_built_entity,
-function(event)
-	if (event.created_entity.name == "pumpjack") then
-		global.pu[event.created_entity.unit_number] = event.created_entity
-	end
-	if (event.created_entity.name == "nuclear-reactor") then
-		global.r[event.created_entity.unit_number] = event.created_entity
-	end
-end
-)
-script.set_event_filter( defines.events.on_built_entity, {{filter = "name", name = "pumpjack"}, {filter = "name", name = "nuclear-reactor"}})
-------------------------------------------------------------------------------------------------------------------------------------------------
-script.on_event(defines.events.on_robot_built_entity,
-function(event)
-	if (event.created_entity.name == "pumpjack") then
-		global.pu[event.created_entity.unit_number] = event.created_entity
-	end
-	if (event.created_entity.name == "nuclear-reactor") then
-		global.r[event.created_entity.unit_number] = event.created_entity
-	end
-end
-)
-script.set_event_filter( defines.events.on_robot_built_entity, {{filter = "name", name = "pumpjack"}, {filter = "name", name = "nuclear-reactor"}})
 -------------------------------------------------------------------------------------------------------------------------
 function convert_shallow_water_in_area(target_area)
 	local surface = game.surfaces[1]
@@ -554,20 +545,6 @@ end
 local on_biter_base_built = function(event)
 	local oxpos = event.entity.position.x
 	local oypos = event.entity.position.y
-	local n = global.n
-	local w = global.w
-	local function find_location()
-		local pos = game.surfaces[1].find_non_colliding_position("biter-spawner", {x = oxpos, y = oypos}, n, 2, true)
-		return pos
-	end
-	local function create_worm()
-		local loc = find_location()
-		if loc ~= nil then
-			game.surfaces[1].create_entity{name = w, position = loc, spawn_decorations = true}
-			create_worm()
-		end
-	end
-	create_worm()
 	if (oxpos > -32 and oxpos < 32 and oypos > -32 and oypos < 32) then
 		reset("Uh oh... The biters have overtaken your spawn!")
 	end
