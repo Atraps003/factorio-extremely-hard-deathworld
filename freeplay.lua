@@ -1,8 +1,6 @@
 local util = require("util")
 local crash_site = require("crash-site")
 
-local SHALLOW_WATER_CONVERSION_DELAY = 60
-
 ----We disable victory conditions of silo script because it doesn't work with soft reset
 global.no_victory = true
 ----
@@ -10,7 +8,6 @@ global.no_victory = true
 global.extremely_hard_victory = false
 
 global.restart = "false"
-global.converted_shallow_water = false
 
 global.latch = 0
 global.u = {
@@ -40,6 +37,7 @@ global.kills_min = 250
 global.kills_max = 300
 
 global.player_state = {}
+global.first_respawn = true
 
 local default_player_state = function ()
 	return {
@@ -87,15 +85,6 @@ end
 local ship_parts = function()
 	return crash_site.default_ship_parts()
 end
-
-local chart_starting_area = function()
-	local r = global.chart_distance or 200
-	local force = game.forces.player
-	local surface = game.surfaces[1]
-	local origin = force.get_spawn_position(surface)
-	force.chart(surface, {{origin.x - r, origin.y - r}, {origin.x + r, origin.y + r}})
-end
-
 -----------------------------------------------------------------------------------------------------------------
 local change_seed = function()
 	local surface = game.surfaces[1]
@@ -119,7 +108,7 @@ local reset_global_setings__pre_surface_clear = function ()
 	-- convert water tiles immediately. We need to disable this flag before
 	-- reset, so that reset chunks are not touch until the surface clear is
 	-- fully complete.
-	global.converted_shallow_water = false
+	-- global.converted_shallow_water = false
 	
 	-- We reset time played before clearing the surface. That way,
 	-- the periodic check that converts all water tiles does not fire until
@@ -160,10 +149,10 @@ local reset_global_settings__post_surface_clear = function()
 	{0,0,0}
 	}
 	global.player_state = {}
+	global.first_respawn = true
 	global.biter_hp = 1
 	global.kills_min = 250
 	global.kills_max = 300
-	-- [converted_shallow_water] is reset during [pre_surface_clear] above
 
 	-- default starting map settings
 	game.map_settings.enemy_evolution.destroy_factor = 0
@@ -253,6 +242,7 @@ local on_player_created = function(event)
 		global.init_ran = true
 		
 		reset_global_settings()
+		game.forces.player.chart(game.surfaces[1], {{x = -200, y = -200}, {x = 200, y = 200}})
 
 		if not global.disable_crashsite then
 			local surface = player.surface
@@ -269,6 +259,10 @@ end
 
 local on_player_respawned = function(event)
 	handle_player_created_or_respawned(event.player_index)
+	if global.first_respawn == true then
+		global.first_respawn = false
+		game.forces.player.chart(game.surfaces[1], {{x = -200, y = -200}, {x = 200, y = 200}})
+	end
 end
 ------------------------------------------------------------------------------------------------
 function reset(reason)
@@ -445,18 +439,6 @@ local on_unit_group_finished_gathering = function(event)
 		end
 	end
 end
--------------------------------------------------------------------------------------------
-script.on_nth_tick(60, function()
-	local surface = game.surfaces[1]
-	if not global.converted_shallow_water and game.ticks_played > SHALLOW_WATER_CONVERSION_DELAY then
-		global.converted_shallow_water = true
-		for chunk in surface.get_chunks() do
-			convert_shallow_water_in_area(chunk.area)	
-		end
-
-		chart_starting_area()
-	end
-end)
 -------------------------------------------------------------------------------------------------------
 script.on_nth_tick(18000, function()
 	local evo = game.forces["enemy"].evolution_factor
@@ -489,7 +471,7 @@ script.on_nth_tick(18000, function()
 		game.map_settings.pollution.enemy_attack_pollution_consumption_modifier = (math.min((game.map_settings.pollution.enemy_attack_pollution_consumption_modifier * 1.3), 1.5))
 	end
 	------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-	 if (game.ticks_played > 70000) then
+	 if (game.ticks_played > 35000) then
 	 	game.map_settings.enemy_expansion.settler_group_min_size = 90
 	 	game.map_settings.enemy_expansion.settler_group_max_size  = 100
 	 end
@@ -521,26 +503,6 @@ function(event)
 end
 )
 script.set_event_filter(defines.events.on_entity_damaged, {{filter = "name", name = "behemoth-biter"}, {filter = "final-health", comparison = "=", value = 0, mode = "and"}})
--------------------------------------------------------------------------------------------------------------------------
-function convert_shallow_water_in_area(target_area)
-	local surface = game.surfaces[1]
-	local set_water_shallow = {}
-	local set_water_mud = {}
-	for k, tile in pairs (surface.find_tiles_filtered{name = "water", area = target_area}) do
-		set_water_shallow[#set_water_shallow + 1] = {name = "water-shallow", position = tile.position}
-	end
-	for k, tile in pairs (surface.find_tiles_filtered{name = "deepwater", area = target_area}) do
-		set_water_mud[#set_water_mud + 1] = {name = "water-mud", position = tile.position}
-	end
-	surface.set_tiles(set_water_shallow)
-	surface.set_tiles(set_water_mud)
-end
-
-local on_chunk_generated = function(event)
-	if global.converted_shallow_water then
-		convert_shallow_water_in_area(event.area)
-	end
-end
 ----------------------------------------------------------------------------------------------------------
 local on_biter_base_built = function(event)
 	local oxpos = event.entity.position.x
@@ -799,7 +761,6 @@ freeplay.events =
 	[defines.events.on_cutscene_cancelled] = on_cutscene_cancelled,
 	[defines.events.on_research_finished] = on_research_finished,
 	[defines.events.on_unit_group_finished_gathering] = on_unit_group_finished_gathering,
-	[defines.events.on_chunk_generated] = on_chunk_generated,
 	[defines.events.on_biter_base_built] = on_biter_base_built,
 	[defines.events.on_rocket_launched] = on_rocket_launched,
 	[defines.events.on_pre_surface_cleared] = on_pre_surface_cleared,
