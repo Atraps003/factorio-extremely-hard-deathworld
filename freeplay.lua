@@ -432,6 +432,7 @@ local on_unit_group_finished_gathering = function(event)
 			local command = {
 			type = defines.command.compound,structure_type = defines.compound_command.return_last,commands =
 			{
+			{type = defines.command.go_to_location,destination = {global.u[1][1], global.u[1][2]}},
 			{type = defines.command.build_base,destination = {global.u[1][1], global.u[1][2]},distraction = defines.distraction.none,ignore_planner = true}
 			}
 			}
