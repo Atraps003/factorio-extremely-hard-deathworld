@@ -569,22 +569,22 @@ local on_research_finished = function(event)
 	end
 	---------------------------------------------------------------------------------------------------------
 	if (event.research.name == "refined-flammables-1") then
-		game.forces["player"].set_turret_attack_modifier("flamethrower-turret", -0.8)
+		game.forces["player"].set_turret_attack_modifier("flamethrower-turret", -0.79)
 	end
 	if (event.research.name == "refined-flammables-2") then
-		game.forces["player"].set_turret_attack_modifier("flamethrower-turret", -0.8)
+		game.forces["player"].set_turret_attack_modifier("flamethrower-turret", -0.78)
 	end
 	if (event.research.name == "refined-flammables-3") then
-		game.forces["player"].set_turret_attack_modifier("flamethrower-turret", -0.8)
+		game.forces["player"].set_turret_attack_modifier("flamethrower-turret", -0.76)
 	end
 	if (event.research.name == "refined-flammables-4") then
-		game.forces["player"].set_turret_attack_modifier("flamethrower-turret", -0.8)
+		game.forces["player"].set_turret_attack_modifier("flamethrower-turret", -0.73)
 	end
 	if (event.research.name == "refined-flammables-5") then
-		game.forces["player"].set_turret_attack_modifier("flamethrower-turret", -0.8)
+		game.forces["player"].set_turret_attack_modifier("flamethrower-turret", -0.7)
 	end
 	if (event.research.name == "refined-flammables-6") then
-		game.forces["player"].set_turret_attack_modifier("flamethrower-turret", -0.8)
+		game.forces["player"].set_turret_attack_modifier("flamethrower-turret", -0.65)
 	end
 	--------------------------------------------------------------------------------------------
 	if (event.research.name == "worker-robots-speed-1") then
