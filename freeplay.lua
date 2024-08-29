@@ -297,6 +297,8 @@ local on_pre_surface_cleared = function(event)
 		-- players. Calling this for online players will cause them instead be
 		-- respawned the next tick, skipping the 10 respawn second timer.
 		pl.ticks_to_respawn = 1
+		--  Need to teleport otherwise offline players will force generate many chunks on new surface at their position on old surface when they rejoin.
+		pl.teleport({0,0})
 	end
 end
 -----------------------------------------------------------------------------------------------
