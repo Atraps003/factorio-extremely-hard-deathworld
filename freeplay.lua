@@ -513,8 +513,12 @@ script.set_event_filter(defines.events.on_entity_damaged, {{filter = "name", nam
 local on_biter_base_built = function(event)
 	local oxpos = event.entity.position.x
 	local oypos = event.entity.position.y
-	if (oxpos > -32 and oxpos < 32 and oypos > -32 and oypos < 32) then
-		reset("Uh oh... The biters have overtaken your spawn!")
+	if (oxpos > -34 and oxpos < 34 and oypos > -34 and oypos < 34) then
+		game.print("[color=acid][font=default-large-bold]Biter nests growing near spawn. Defeat imminent![/font][/color]")
+		local nest_count = game.surfaces[1].count_entities_filtered{area={left_top = {x = -32, y = -32}, right_bottom = {x = 32, y = 32}},type={"turret","unit-spawner"}}
+		if nest_count > 3 then
+			reset("Uh oh... The biters have overtaken your spawn!")
+		end
 	end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------------
