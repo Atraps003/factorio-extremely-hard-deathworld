@@ -6,7 +6,7 @@ global.no_victory = true
 ----
 
 global.extremely_hard_victory = false
-
+global.reset_seed = 987654321
 global.restart = "false"
 
 global.latch = 0
@@ -89,7 +89,7 @@ end
 local change_seed = function()
 	local surface = game.surfaces[1]
 	local mgs = surface.map_gen_settings
-	mgs.seed = math.random(1111,999999999)
+	mgs.seed = global.reset_seed
 	surface.map_gen_settings = mgs
 end
 -------------------------------------------------------------------------------------------------------------------------------
