@@ -196,7 +196,7 @@ local reset_global_settings__post_surface_clear = function()
 	end
 	
 	game.forces["enemy"].friendly_fire = false
-	game.forces["player"].research_queue_enabled = true
+	game.forces["player"].research_queue_enabled = false
 	game.forces["player"].max_failed_attempts_per_tick_per_construction_queue = 2
 	game.forces["player"].max_successful_attempts_per_tick_per_construction_queue = 6
 	game.difficulty_settings.technology_price_multiplier = 1
