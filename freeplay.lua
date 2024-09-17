@@ -8,7 +8,7 @@ global.no_victory = true
 global.extremely_hard_victory = false
 global.reset_seed = 987654321
 global.restart = "false"
-global.hard_mode = true
+global.hard_mode = false
 
 global.latch = 0
 global.u = {
@@ -268,7 +268,7 @@ local on_player_respawned = function(event)
 end
 ------------------------------------------------------------------------------------------------
 function reset(reason)
-
+	local reset_seed = global.reset_seed
 	local reset_type = nil
 	local red = game.forces["player"].item_production_statistics.get_output_count "automation-science-pack"
 	if (global.restart == "true") then
@@ -282,7 +282,7 @@ function reset(reason)
 			local mode = global.hard_mode and "hard" or "normal"
 			local rockets_launched = game.forces["player"].rockets_launched
 			
-			local log_message = string.format("%d_%s_%s_%d_%d_%d_%d", global.reset_seed, mode, tostring(victory), red, deaths, minutes, rockets_launched)
+			local log_message = string.format("%d_%s_%s_%d_%d_%d_%d", reset_seed, mode, tostring(victory), red, deaths, minutes, rockets_launched)
 
 			game.write_file("reset/reset.log", log_message, false, 0)
 
