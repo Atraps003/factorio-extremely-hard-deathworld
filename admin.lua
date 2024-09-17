@@ -84,7 +84,7 @@ function admin.create_top_left_button(player)
     end
 
     -- Create the top-left button
-    player.gui.left.add({
+    player.gui.top.add({
         type = "button",
         name = "admin_panel_button",
         caption = "Admin Tools"
