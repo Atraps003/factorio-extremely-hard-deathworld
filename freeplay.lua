@@ -172,7 +172,6 @@ local reset_global_settings__post_surface_clear = function()
 	game.map_settings.pollution.enabled = true
 	game.map_settings.pollution.enemy_attack_pollution_consumption_modifier = 0.5
 	game.map_settings.unit_group.max_gathering_unit_groups = 30
-	game.map_settings.unit_group.min_unit_group_size = 10
 	game.map_settings.unit_group.max_unit_group_size = 11
 
 	-- path finding changes to reduce lag
@@ -499,12 +498,10 @@ script.on_nth_tick(18000, function()
 	if ((game.ticks_played > 36000 and global.hard_mode) or game.ticks_played > 108000) then
 	 	game.map_settings.enemy_expansion.settler_group_min_size = 90
 	 	game.map_settings.enemy_expansion.settler_group_max_size  = 100		
-		game.map_settings.unit_group.min_unit_group_size = 70
 		game.map_settings.unit_group.max_unit_group_size = 150
 	elseif (game.ticks_played > 36000) then -- if hardmode is off increase the size of the settler groups after 10 minutes
 		game.map_settings.enemy_expansion.settler_group_min_size = 20
 		game.map_settings.enemy_expansion.settler_group_max_size  = 22
-		game.map_settings.unit_group.min_unit_group_size = 20
 		game.map_settings.unit_group.max_unit_group_size = 22
 	 end
 	---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
