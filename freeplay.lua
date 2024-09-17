@@ -162,14 +162,11 @@ local reset_global_settings__post_surface_clear = function()
 	else
 		game.map_settings.enemy_evolution.time_factor = 0.00005
 	end
-	game.map_settings.enemy_evolution.time_factor = 0.00007
 	game.map_settings.enemy_expansion.enabled = true
 	game.map_settings.enemy_expansion.max_expansion_cooldown  = 4000
 	game.map_settings.enemy_expansion.min_expansion_cooldown  = 3000
 	game.map_settings.enemy_expansion.settler_group_max_size  = 11
 	game.map_settings.enemy_expansion.settler_group_min_size = 10
-	game.map_settings.path_finder.general_entity_subsequent_collision_penalty = 1
-	game.map_settings.path_finder.ignore_moving_enemy_collision_distance = 0
 	game.map_settings.pollution.ageing = 0.5
 	game.map_settings.pollution.enabled = true
 	game.map_settings.pollution.enemy_attack_pollution_consumption_modifier = 0.5
@@ -180,9 +177,7 @@ local reset_global_settings__post_surface_clear = function()
 	game.map_settings.path_finder.general_entity_collision_penalty = 5
 	game.map_settings.path_finder.general_entity_subsequent_collision_penalty = 1
 	game.map_settings.path_finder.ignore_moving_enemy_collision_distance = 0  -- Keep this low to avoid complex behavior
-	game.map_settings.max_failed_behavior_count = 3
-	game.map_settings.path_finder.path_resolution_modifier = 2  -- Reduce pathfinding recalculations
-	game.map_settings.path_finder.group_size = 5  -- Simplify pathfinding for larger groups
+	game.map_settings.max_failed_behavior_count = 1
 	
 
 	local surface = game.surfaces[1]
