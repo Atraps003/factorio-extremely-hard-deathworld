@@ -74,5 +74,5 @@
   ],
 
   "_seed_comment": "Use null for a random seed, number for a specific seed.",
-  "seed": null
+  "seed": 987654321
 }
