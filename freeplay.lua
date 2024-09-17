@@ -8,6 +8,7 @@ global.no_victory = true
 global.extremely_hard_victory = false
 global.reset_seed = 987654321
 global.restart = "false"
+global.hard_mode = true
 
 global.latch = 0
 global.u = {
@@ -156,21 +157,33 @@ local reset_global_settings__post_surface_clear = function()
 	-- default starting map settings
 	game.map_settings.enemy_evolution.destroy_factor = 0
 	game.map_settings.enemy_evolution.pollution_factor = 0
+	if global.hard_mode then
+		game.map_settings.enemy_evolution.time_factor = 0.00007
+	else
+		game.map_settings.enemy_evolution.time_factor = 0.00005
+	end
 	game.map_settings.enemy_evolution.time_factor = 0.00007
 	game.map_settings.enemy_expansion.enabled = true
 	game.map_settings.enemy_expansion.max_expansion_cooldown  = 4000
 	game.map_settings.enemy_expansion.min_expansion_cooldown  = 3000
 	game.map_settings.enemy_expansion.settler_group_max_size  = 11
 	game.map_settings.enemy_expansion.settler_group_min_size = 10
-	game.map_settings.path_finder.general_entity_collision_penalty = 1
 	game.map_settings.path_finder.general_entity_subsequent_collision_penalty = 1
 	game.map_settings.path_finder.ignore_moving_enemy_collision_distance = 0
-	game.map_settings.max_failed_behavior_count = 1
 	game.map_settings.pollution.ageing = 0.5
 	game.map_settings.pollution.enabled = true
 	game.map_settings.pollution.enemy_attack_pollution_consumption_modifier = 0.5
 	game.map_settings.unit_group.max_gathering_unit_groups = 30
 	game.map_settings.unit_group.max_unit_group_size = 150
+
+	-- path finding changes to reduce lag
+	game.map_settings.path_finder.general_entity_collision_penalty = 5
+	game.map_settings.path_finder.general_entity_subsequent_collision_penalty = 1
+	game.map_settings.path_finder.ignore_moving_enemy_collision_distance = 0  -- Keep this low to avoid complex behavior
+	game.map_settings.max_failed_behavior_count = 3
+	game.map_settings.path_finder.path_resolution_modifier = 2  -- Reduce pathfinding recalculations
+	game.map_settings.path_finder.group_size = 5  -- Simplify pathfinding for larger groups
+	
 
 	local surface = game.surfaces[1]
 	if math.random(1,2) == 2 then
@@ -260,6 +273,7 @@ local on_player_respawned = function(event)
 end
 ------------------------------------------------------------------------------------------------
 function reset(reason)
+
 	local reset_type = nil
 	local red = game.forces["player"].item_production_statistics.get_output_count "automation-science-pack"
 	if (global.restart == "true") then
@@ -270,7 +284,13 @@ function reset(reason)
 			local victory = global.extremely_hard_victory
 			local deaths = game.forces["player"].kill_count_statistics.get_output_count "character"
 			local minutes = math.floor((game.ticks_played / 3600) * 10) / 10
-			game.write_file("reset/reset.log", {"",victory,"_",red,"_",deaths,"_",minutes}, false, 0)
+			local mode = global.hard_mode and "hard" or "normal"
+			local rockets_launched = game.forces["player"].rockets_launched
+			
+			local log_message = string.format("%s_%d_%d_%d_%s_%d", tostring(victory), red, deaths, minutes, mode, rockets_launched)
+
+			game.write_file("reset/reset.log", log_message, false, 0)
+
 		end
 		reset_type = "[color=green][font=default-large-bold]Soft reset[/font][/color]"
 		change_seed()
@@ -278,7 +298,8 @@ function reset(reason)
 		game.forces["player"].reset()
 	end
 	if reason ~= nil then
-		game.print(string.format("%s [color=yellow]%s[/color]", reset_type, reason))
+		game.print(string.format("%s [color=yellow]%s Hardmode is currently [/color][color=%s[/color]", reset_type, reason, global.hard_mode and "red]on" or "green]off"))
+
 	end
 end
 -----------------------------------------------------------------------------------------------
@@ -477,7 +498,8 @@ script.on_nth_tick(18000, function()
 		game.map_settings.pollution.enemy_attack_pollution_consumption_modifier = (math.min((game.map_settings.pollution.enemy_attack_pollution_consumption_modifier * 1.3), 1.5))
 	end
 	------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-	 if (game.ticks_played > 35000) then
+	--if hardmode is on increase the size of the settler groups after 10 minutes, otherwise after 30 minutes
+	if ((game.ticks_played > 36000 and global.hard_mode) or game.ticks_played > 108000) then
 	 	game.map_settings.enemy_expansion.settler_group_min_size = 90
 	 	game.map_settings.enemy_expansion.settler_group_max_size  = 100
 	 end
