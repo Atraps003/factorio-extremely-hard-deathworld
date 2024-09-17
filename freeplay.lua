@@ -209,7 +209,7 @@ local reset_global_settings__post_surface_clear = function()
 	end
 	
 	game.forces["enemy"].friendly_fire = false
-	game.forces["player"].research_queue_enabled = false
+	game.forces["player"].research_queue_enabled = true
 	game.forces["player"].max_failed_attempts_per_tick_per_construction_queue = 2
 	game.forces["player"].max_successful_attempts_per_tick_per_construction_queue = 6
 	game.difficulty_settings.technology_price_multiplier = 1
@@ -287,7 +287,7 @@ function reset(reason)
 			local mode = global.hard_mode and "hard" or "normal"
 			local rockets_launched = game.forces["player"].rockets_launched
 			
-			local log_message = string.format("%s_%d_%d_%d_%s_%d", tostring(victory), red, deaths, minutes, mode, rockets_launched)
+			local log_message = string.format("%d_%s_%s_%d_%d_%d_%d", global.reset_seed, mode, tostring(victory), red, deaths, minutes, rockets_launched)
 
 			game.write_file("reset/reset.log", log_message, false, 0)
 
@@ -449,7 +449,7 @@ local on_unit_group_finished_gathering = function(event)
 			local command = {
 			type = defines.command.compound,structure_type = defines.compound_command.return_last,commands =
 			{
-			{type = defines.command.go_to_location,destination = {global.u[1][1], global.u[1][2]}},
+			{type = defines.command.go_to_location,destination = {global.u[1][1], global.u[1][2]},distraction = defines.distraction.none},
 			{type = defines.command.build_base,destination = {global.u[1][1], global.u[1][2]},distraction = defines.distraction.none,ignore_planner = true}
 			}
 			}
@@ -641,10 +641,13 @@ local on_research_finished = function(event)
 end
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 local on_research_cancelled = function(event)
-	game.difficulty_settings.technology_price_multiplier = 1
+	if event.research[global.research] == 1 then
+		game.difficulty_settings.technology_price_multiplier = 1
+	end
 end
 -------------------------------------------------------------------------------------------
 local on_research_started = function(event)
+	global.research = event.research.name
 	if (event.research.name == "nuclear-power") then
 		game.difficulty_settings.technology_price_multiplier = 0.5
 	end
