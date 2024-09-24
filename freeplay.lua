@@ -176,11 +176,14 @@ local reset_global_settings__post_surface_clear = function()
 	game.map_settings.unit_group.max_unit_group_size = 150
 
 	-- path finding changes to reduce lag
-	game.map_settings.path_finder.general_entity_collision_penalty = 5
-	game.map_settings.path_finder.general_entity_subsequent_collision_penalty = 1
-	game.map_settings.path_finder.ignore_moving_enemy_collision_distance = 0  -- Keep this low to avoid complex behavior
+	game.map_settings.path_finder.general_entity_collision_penalty = 0
+	game.map_settings.path_finder.general_entity_subsequent_collision_penalty = 0
+	game.map_settings.path_finder.ignore_moving_enemy_collision_distance = 0
+	game.map_settings.path_finder.use_path_cache = false
+	game.map_settings.path_finder.extended_collision_penalty = 0
+	game.map_settings.path_finder.enemy_with_different_destination_collision_penalty = 0
+	game.map_settings.path_finder.stale_enemy_with_same_destination_collision_penalty = 0
 	game.map_settings.max_failed_behavior_count = 1
-	
 
 	local surface = game.surfaces[1]
 	if math.random(1,2) == 2 then
