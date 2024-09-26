@@ -2,9 +2,6 @@
 
 local hud = {}
 
-local handler = require("event_handler")
-local admin = require("admin")
-handler.add_lib(admin)
 
 
 
