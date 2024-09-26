@@ -4,7 +4,7 @@ local spitter_death_records = 20
 
 ----We disable victory conditions of silo script because it doesn't work with soft reset
 global.no_victory = true
-----
+---
 global.biter_hp = 3000
 
 global.biter_initial_hp = 3000
@@ -28,8 +28,8 @@ global.spitter_to_worm_conversion_map =
 
 
 local resetVariables = function()
-	global.deconstruction_history = {}
 	global.player_state = {}
+	global.deconstruction_history = {}
 	global.new_map = true
 	-- clear globals
 	global.extremely_hard_victory = false
@@ -38,7 +38,6 @@ local resetVariables = function()
 	for i = 1, spitter_death_records do
 		global.u[i] = { 0, 0 }
 	end
-	global.player_state = {}
 	global.biter_hp = 3000
 	global.kills_min = 250
 	global.kills_max = 300
@@ -204,6 +203,9 @@ local reset_global_settings = function()
 end
 
 local handle_player_created_or_respawned = function(player_index)
+	if(global.player_state == nil) then
+		resetVariables()
+	end
 	local player = game.get_player(player_index)
 
 	if global.player_state[player_index] == nil then
