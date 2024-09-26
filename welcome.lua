@@ -30,7 +30,7 @@ function welcome.show_welcome_popup(player)
 
     frame.add{type = "label", caption = " "}  -- Empty label to create a blank line
     
-    local label3= frame.add{type = "label", caption = "[color=#99ff99][font=default]The server has 2 game modes (hardmode on/off), this mode is shown on server reset. During the week hardmode is normally off so that smaller groups have a chance to win, and at the weekends we group up to take on the harder mode :). Don't be fooled though even with hardmode off its no picnic.[/font][/color]"}
+    local label3= frame.add{type = "label", caption = "[color=#99ff99][font=default]The server has 2 game modes (hardmode on/off), this mode is shown on server reset, or type /mode to see the current mode. During the week hardmode is normally off so that smaller groups have a chance to win, and at the weekends we group up to take on the harder mode :). Don't be fooled though even with hardmode off its no picnic.[/font][/color]"}
     label3.style.single_line = false
     label3.style.maximal_width = framewidth
     
@@ -86,6 +86,10 @@ end
     commands.add_command("welcome", "Open the welcome message", function(cmd)
         local player = game.players[cmd.player_index]
         welcome.show_welcome_popup(player)
+    end)
+    commands.add_command("mode", "Show the current mode", function(cmd)
+        local player = game.players[cmd.player_index]
+        player.print(string.format("[color=yellow]Hardmode is currently [/color][color=%s[/color]",  global.hard_mode and "red]on" or "green]off"))
     end)
 
     local lib = {}
