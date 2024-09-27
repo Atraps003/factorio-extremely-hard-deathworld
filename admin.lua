@@ -29,8 +29,8 @@ local function give_custom_deconstruction_planner(player)
         local planner = player.cursor_stack
         if planner and planner.is_deconstruction_item then
             -- Set the tile filters to only target landfill
-            planner.tile_filters = {landfill_tile_name}  -- Set to target only landfill tiles
-            planner.entity_filters = {}  -- Clear 
+            planner.tile_filters = { landfill_tile_name } -- Set to target only landfill tiles
+            planner.entity_filters = {}                   -- Clear
             planner.tile_selection_mode = defines.deconstruction_item.tile_selection_mode.only
             -- Mark that the player is holding the custom deconstruction planner
             global.player_holding_custom_planner[player.index] = true
@@ -55,7 +55,7 @@ function admin.on_player_cursor_stack_changed(event)
         -- If the player is no longer holding the custom deconstruction planner
         if not cursor_stack.valid_for_read or cursor_stack.name ~= "deconstruction-planner" then
             global.player_holding_custom_planner[player.index] = false
-            
+
             -- Try to delete the custom deconstruction planner from their inventory
             local main_inventory = player.get_main_inventory()
             if main_inventory then
@@ -71,30 +71,6 @@ function admin.on_player_cursor_stack_changed(event)
             end
         end
     end
-end
-
--- Function to create the top-left button for admins
-function admin.create_top_left_button(player)
-    -- Ensure the player is an admin
-    if not player.admin then return end
-
-    -- If the button already exists, destroy it to avoid duplicate creation
-    if player.gui.top.admin_panel_button then
-        player.gui.top.admin_panel_button.destroy()
-    end
-
-    -- Create the top-left button
-    player.gui.top.add({
-        type = "button",
-        name = "admin_panel_button",
-        caption = "Admin Tools"
-    })
-end
-
--- Event handler for when a player joins the game
-function admin.on_player_joined(event)
-    local player = game.players[event.player_index]
-    admin.create_top_left_button(player)
 end
 
 -- Store the deconstruction event
@@ -124,8 +100,8 @@ function admin.highlight_deconstruction_area(surface, area, player_name)
 
     if area and area.left_top and area.right_bottom then
         -- Define the color and duration for the rectangle highlight
-        local color = {r = 1, g = 0, b = 0, a = 0.5} -- Red with some transparency
-        local duration_ticks = 60 * 10  -- 10 seconds
+        local color = { r = 1, g = 0, b = 0, a = 0.5 } -- Red with some transparency
+        local duration_ticks = 60 * 10                 -- 10 seconds
 
         -- Get all admin players
         local admins = admin.get_admin_players()
@@ -138,7 +114,7 @@ function admin.highlight_deconstruction_area(surface, area, player_name)
             left_top = area.left_top,
             right_bottom = area.right_bottom,
             surface = surface,
-            players = admins, -- Show only to admins
+            players = admins,             -- Show only to admins
             time_to_live = duration_ticks -- Duration before it disappears
         })
 
@@ -146,11 +122,11 @@ function admin.highlight_deconstruction_area(surface, area, player_name)
         rendering.draw_text({
             text = player_name,
             surface = surface,
-            target = area.left_top, -- Position the text at the top-left of the deconstruction area
-            color = {r = 1, g = 1, b = 1, a = 0.5}, -- White color with 50% transparency (alpha = 0.5)
+            target = area.left_top,                   -- Position the text at the top-left of the deconstruction area
+            color = { r = 1, g = 1, b = 1, a = 0.5 }, -- White color with 50% transparency (alpha = 0.5)
             scale = 1.5,
-            players = admins, -- Show only to admins
-            time_to_live = duration_ticks -- Duration before it disappears
+            players = admins,                         -- Show only to admins
+            time_to_live = duration_ticks             -- Duration before it disappears
         })
     end
 end
@@ -234,7 +210,7 @@ function admin.on_gui_click(event)
     end
 
     -- Handle clicking the top-left button to open the admin panel
-    if event.element.name == "admin_panel_button" then
+    if event.element.name == "admin_open_panel_button" then
         admin.show_admin_panel(player)
     end
 end
@@ -271,7 +247,7 @@ function admin.on_player_deconstructed_area(event)
                         local tile = surface.get_tile(x, y)
                         if tile.name == "landfill" and tiles_changed < max_tiles_to_change then
                             -- Replace landfill tile with water
-                            table.insert(tiles_to_replace, {name = "water", position = {x, y}})
+                            table.insert(tiles_to_replace, { name = "water", position = { x, y } })
                             tiles_changed = tiles_changed + 1
                         end
                         -- Stop if we have changed 20 tiles
@@ -287,13 +263,15 @@ function admin.on_player_deconstructed_area(event)
                 -- Replace the tiles on the surface
                 if #tiles_to_replace > 0 then
                     surface.set_tiles(tiles_to_replace)
-                    game.print(string.format("[color=red]%s landfill tiles have been removed and replaced with water by %s.[/color]", tiles_changed, player.name))
+                    game.print(string.format(
+                        "[color=red]%s landfill tiles have been removed and replaced with water by %s.[/color]",
+                        tiles_changed, player.name))
                 else
                     player.print("No landfill tiles were found in the selected area.")
                 end
 
                 -- Remove the custom deconstruction planner from their hand
-                player.clear_cursor()  -- Clears whatever is in their hand
+                player.clear_cursor() -- Clears whatever is in their hand
 
                 -- Optionally, remove it from their inventory too
                 local main_inventory = player.get_main_inventory()
@@ -323,13 +301,12 @@ function admin.on_player_deconstructed_area(event)
     end
 end
 
-
-
 -- Command to give the player a custom deconstruction planner for landfill removal
-commands.add_command("give_landfill_removal_planner", "Gives a deconstruction planner for landfill removal", function(cmd)
-    local player = game.players[cmd.player_index]
-    give_custom_deconstruction_planner(player)
-end)
+commands.add_command("give_landfill_removal_planner", "Gives a deconstruction planner for landfill removal",
+    function(cmd)
+        local player = game.players[cmd.player_index]
+        give_custom_deconstruction_planner(player)
+    end)
 
 -- Add a command to open the admin panel
 commands.add_command("open_admin_panel", "Open the admin panel", function(cmd)
@@ -343,6 +320,6 @@ lib.events = {
     [defines.events.on_player_joined_game] = admin.on_player_joined,
     [defines.events.on_gui_click] = admin.on_gui_click,
     [defines.events.on_player_deconstructed_area] = admin.on_player_deconstructed_area,
-    [defines.events.on_player_cursor_stack_changed] = admin.on_player_cursor_stack_changed,  -- Add this line
+    [defines.events.on_player_cursor_stack_changed] = admin.on_player_cursor_stack_changed, -- Add this line
 }
 return lib
